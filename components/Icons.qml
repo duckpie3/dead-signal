@@ -1,0 +1,28 @@
+pragma Singleton
+
+import Quickshell
+
+// Outline icons (Lucide, ISC licence) as SVG path data on a 24x24 grid.
+Singleton {
+    readonly property string volume:    "M11 5 6 9H2v6h4l5 4z M15.5 8.5 a5 5 0 0 1 0 7 M19 5 a10 10 0 0 1 0 14"
+    readonly property string volumeOff: "M11 5 6 9H2v6h4l5 4z M22 9 16 15 M16 9 22 15"
+    readonly property string sun:       "M8 12 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 M12 2 v2 M12 20 v2 M4.93 4.93 l1.41 1.41 M17.66 17.66 l1.41 1.41 M2 12 h2 M20 12 h2 M6.34 17.66 l-1.41 1.41 M19.07 4.93 l-1.41 1.41"
+    readonly property string bluetooth: "M7 7 L17 17 L12 22 V2 L17 7 L7 17"
+    readonly property string cloud:     "M17.5 19 H9 a7 7 0 1 1 6.71 -9 h1.79 a4.5 4.5 0 1 1 0 9 Z"
+    readonly property string message:   "M7.9 20 A9 9 0 1 0 4 16.1 L2 22 Z"
+    readonly property string power:     "M12 2 v10 M18.4 6.6 a9 9 0 1 1 -12.77 0.04"
+    readonly property string lock:      "M3 11 h18 v11 H3 Z M7 11 V7 a5 5 0 0 1 10 0 v4"
+    readonly property string moon:      "M12 3 a6 6 0 0 0 9 9 a9 9 0 1 1 -9 -9 Z"
+    readonly property string logout:    "M9 21 H5 a2 2 0 0 1 -2 -2 V5 a2 2 0 0 1 2 -2 h4 M16 17 l5 -5 -5 -5 M21 12 H9"
+    readonly property string reboot:    "M3 12 a9 9 0 1 0 9 -9 a9.75 9.75 0 0 0 -6.74 2.74 L3 8 M3 3 v5 h5"
+    readonly property string chevLeft:  "M15 18 l-6 -6 6 -6"
+    readonly property string chevRight: "M9 18 l6 -6 -6 -6"
+    readonly property string search:    "M3 11 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M21 21 l-4.35 -4.35"
+    readonly property string enter:     "M20 4 v7 a4 4 0 0 1 -4 4 H4 M9 10 l-5 5 5 5"
+    readonly property string chart:     "M3 3 v18 h18 M7 15 l4 -5 3 3 5 -7"
+    readonly property string bell:      "M6 8 a6 6 0 0 1 12 0 c0 7 3 9 3 9 H3 s3 -2 3 -9 M10.3 21 a1.94 1.94 0 0 0 3.4 0"
+    readonly property string close:     "M18 6 L6 18 M6 6 L18 18"
+    readonly property string mic:       "M12 2 a3 3 0 0 0 -3 3 v7 a3 3 0 0 0 6 0 V5 a3 3 0 0 0 -3 -3 z M19 10 v2 a7 7 0 0 1 -14 0 v-2 M12 19 v3"
+    readonly property string micOff:    "M12 2 a3 3 0 0 0 -3 3 v7 a3 3 0 0 0 6 0 V5 a3 3 0 0 0 -3 -3 z M19 10 v2 a7 7 0 0 1 -14 0 v-2 M12 19 v3 M2 2 L22 22"
+    readonly property string keyboard:  "M2 5 h20 v14 H2 z M6 9 h.01 M10 9 h.01 M14 9 h.01 M18 9 h.01 M7 15 h10"
+}
