@@ -3,8 +3,10 @@
 
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import qs.bar
 import qs.launcher
+import qs.lock
 import qs.notify
 import qs.osd
 import qs.services
@@ -38,6 +40,30 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         WallpaperWindow {}
+    }
+
+    // Session lock: covers every screen until the password is accepted and the shutters have opened.
+    WlSessionLock {
+        locked: LockState.locked
+        onLockedChanged: console.log("[lock] session lock requested:", locked)
+        onSecureChanged: console.log("[lock] compositor reports the session as secure:", secure)
+        LockSurface {}
+    }
+
+    // Dim shutters that open over the desktop right after unlocking.
+    Variants {
+        model: Quickshell.screens
+        UnlockOverlay {}
+    }
+
+    // Hyprland:  bind = SUPER, L, exec, qs -c deadsignal ipc call lock lock
+    IpcHandler {
+        target: "lock"
+        function lock(): void {
+            console.log("[lock] ipc lock called");
+            LockState.lock();
+        }
+        function isLocked(): bool { return LockState.locked; }
     }
 
     // Hyprland:  bind = SUPER, space, exec, qs -c deadsignal ipc call launcher toggle

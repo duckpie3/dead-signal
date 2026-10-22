@@ -145,6 +145,36 @@ Set the folder and the command that applies a wallpaper in `Config.qml` (`wallpa
 The choice is kept in `~/.local/state/deadsignal/wallpaper.json` and set again at startup.
 Image sizes come from ImageMagick's `identify` when it is installed.
 
+## Lock screen
+
+A real Wayland session lock (`ext-session-lock`, via Quickshell's `WlSessionLock`), so nothing can be
+reached until the password is accepted. The password is checked with PAM (`pam/password.conf`, your account
+password only). It needs Quickshell 0.2 or newer built with PAM support (the Arch package has it).
+
+```
+bind = SUPER, L, exec, qs -c deadsignal ipc call lock lock
+```
+
+The power menu's Lock entry runs the same command (`Config.lockCommand`). For idle and suspend with hypridle:
+
+```
+general {
+    lock_cmd = qs -c deadsignal ipc call lock lock
+    before_sleep_cmd = qs -c deadsignal ipc call lock lock
+}
+listener { timeout = 300  on-timeout = loginctl lock-session }
+```
+
+Press any key to wake it, type, Enter to unlock. Esc clears. Each character fills one of twelve segments;
+the scan line and the green cascade play first. The session is then released and the dim shutters open
+over your real desktop, so windows fade in rather than pop up. A wrong password
+flashes the segments red and fades them back. The wallpaper behind it is the one set from the picker.
+Caps Lock is read from the keyboard LED in `/sys/class/leds`.
+
+Try it with a second TTY (Ctrl+Alt+F3) logged in first. If the lock ever fails to accept your password,
+run `pkill quickshell` there and start the shell again: the compositor keeps the screen locked until a
+lock client unlocks it, so restart it and enter your password normally.
+
 ## Layout
 
 ```
@@ -155,9 +185,11 @@ popups/            audio, network, calendar, battery, session, telemetry, notifi
 notify/            ToastWindow, ToastCard
 osd/               OsdWindow
 wallpaper/         WallpaperWindow, WallCard
+lock/              LockSurface, LockScene, UnlockOverlay
+pam/               password.conf (PAM stack for the lock screen)
 launcher/          LauncherWindow, ResultRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
-services/          Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers
+services/          Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
 theme/             Theme (tokens) and Config (your settings)
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```

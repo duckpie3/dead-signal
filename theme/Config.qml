@@ -27,7 +27,7 @@ Singleton {
     readonly property var terminal: ["foot"]
 
     // Session commands.
-    readonly property var lockCommand:     ["loginctl", "lock-session"]
+    readonly property var lockCommand:     ["qs", "-c", "deadsignal", "ipc", "call", "lock", "lock"]
     readonly property var suspendCommand:  ["systemctl", "suspend"]
     readonly property var logoutCommand:   ["hyprctl", "dispatch", "exit"]
     readonly property var rebootCommand:   ["systemctl", "reboot"]
@@ -69,6 +69,9 @@ Singleton {
     // Default is swww (start its daemon first, newer builds are called awww: change the first word).
     // For hyprpaper (0.8+) try:  ["hyprctl", "hyprpaper", "wallpaper", ",{file},{fit}"]
     // with fill -> "cover", fit -> "contain", tile -> "tile".
+    // hyprpaper before 0.8 has no fit modes; use a list of commands, and only {file}:
+    //   [["hyprctl", "hyprpaper", "preload", "{file}"], ["hyprctl", "hyprpaper", "wallpaper", ",{file}"]]
+    // Whatever the command prints is written to the Quickshell log (qs -c deadsignal log).
     readonly property var wallpaperCommand: ["hyprctl", "hyprpaper", "wallpaper", "eDP-1,{file},{fit}"]
     // The picker's Fill / Fit / Tile as your wallpaper tool names them. swww has no tiling; "no" keeps the original size.
     readonly property var wallpaperFitNames: ({ fill: "cover", fit: "contain", tile: "tile" })

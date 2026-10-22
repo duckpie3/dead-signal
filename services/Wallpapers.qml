@@ -70,11 +70,28 @@ Singleton {
         }
     }
 
-    // Runs Config.wallpaperCommand with {file} and {fit} filled in.
+    // Runs Config.wallpaperCommand with {file} and {fit} filled in. The command may also be a list of
+    // commands (for hyprpaper before 0.8: preload, then wallpaper); they run one after another.
+    // Output and errors from the command are written to the Quickshell log.
+    property var queue: []
+
     function run(path, fit) {
         const fitName = Config.wallpaperFitNames[fit] || fit;
-        const cmd = Config.wallpaperCommand.map(a => a.split("{file}").join(path).split("{fit}").join(fitName));
-        Quickshell.execDetached(cmd);
+        const fill = a => a.split("{file}").join(path).split("{fit}").join(fitName);
+        const c = Config.wallpaperCommand;
+        const cmds = Array.isArray(c[0]) ? c : [c];
+        root.queue = cmds.map(cmd => cmd.map(fill));
+        root.next();
+    }
+
+    function next() {
+        if (runner.running || root.queue.length === 0) return;
+        const q = root.queue.slice();
+        const cmd = q.shift();
+        root.queue = q;
+        console.log("wallpaper: " + cmd.join(" "));
+        runner.command = cmd;
+        runner.running = true;
     }
 
     function apply(path, fit) {
@@ -82,6 +99,16 @@ Singleton {
         root.fit = fit;
         root.run(path, fit);
         mkdir.running = true;
+    }
+
+    Process {
+        id: runner
+        stdout: StdioCollector { onStreamFinished: if (text.trim() !== "") console.log("wallpaper: " + text.trim()) }
+        stderr: StdioCollector { onStreamFinished: if (text.trim() !== "") console.warn("wallpaper: " + text.trim()) }
+        onExited: (code, status) => {
+            if (code !== 0) console.warn("wallpaper: command exited with code " + code);
+            root.next();
+        }
     }
 
     Process {
