@@ -4,16 +4,23 @@ import qs.theme
 import qs.components
 import qs.services
 
-// Backlight. Scroll: ±5 %. Hidden when there is no backlight device.
+// Backlight. Click opens the display popup; scroll: ±5 %. A moon and a brass pixel while night light is on.
+// Hidden when there is no backlight device.
 Cell {
     id: root
+
+    signal toggle()
 
     visible: Brightness.available
     interactive: true
 
+    onClicked: m => root.toggle()
     onWheeled: w => Brightness.step(w.angleDelta.y > 0 ? 5 : -5)
 
-    Glyph { path: Icons.sun; color: Theme.ash }
+    Glyph {
+        path: NightLight.on ? Icons.moon : Icons.sun
+        color: NightLight.on ? Theme.brass : Theme.ash
+    }
 
     SegMeter {
         count: 10
@@ -25,5 +32,15 @@ Cell {
         Layout.preferredWidth: 32
         horizontalAlignment: Text.AlignRight
         text: Brightness.percent + "%"
+    }
+
+    Rectangle {
+        visible: NightLight.on
+        parent: root
+        x: 6
+        y: 5
+        width: 2
+        height: 2
+        color: Theme.brass
     }
 }

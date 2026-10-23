@@ -175,6 +175,23 @@ Try it with a second TTY (Ctrl+Alt+F3) logged in first. If the lock ever fails t
 run `pkill quickshell` there and start the shell again: the compositor keeps the screen locked until a
 lock client unlocks it, so restart it and enter your password normally.
 
+## Bluetooth, display, power profile, airplane mode
+
+Each of these lives in the popup of the cell it belongs to, so nothing is controlled from two places.
+
+- **Bluetooth cell** (after the network cell, hidden without an adapter). Click for the popup: adapter switch,
+  connected / paired / available devices with battery, Scan and Stop. Scanning runs only while the popup is open.
+  Click a device to connect, disconnect, or pair. Needs BlueZ running (`bluetooth.service`).
+- **Brightness cell**: click for the display popup (brightness slider, night light with a temperature slider).
+  Scrolling the cell and the brightness keys still adjust by 5 %. Night light runs `Config.nightCommand`,
+  `hyprsunset -t {temp}` by default (install `hyprsunset`). The cell shows a moon and a brass pixel while it is on.
+- **Battery popup**: Saver / Balanced / Perf selector (needs `power-profiles-daemon`; Perf only shows when the
+  hardware has it).
+- **Network popup**: Airplane mode switch. It runs `rfkill block|unblock wifi bluetooth`, and reads the state
+  from `rfkill -J` while the popup is open.
+- **Tray**: items matching `Config.trayHidden` (blueman, nm-applet by default) are hidden, since the bar has cells
+  for them.
+
 ## Layout
 
 ```
@@ -189,7 +206,7 @@ lock/              LockSurface, LockScene, UnlockOverlay
 pam/               password.conf (PAM stack for the lock screen)
 launcher/          LauncherWindow, ResultRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
-services/          Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
+services/          Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
 theme/             Theme (tokens) and Config (your settings)
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```

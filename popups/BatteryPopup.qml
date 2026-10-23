@@ -26,17 +26,16 @@ Popup {
         return h + "h" + String(m).padStart(2, "0") + "m";
     }
 
-    function profileName(p) {
-        if (p === PowerProfile.PowerSaver) return "SAVER";
-        if (p === PowerProfile.Performance) return "PERFORMANCE";
-        return "BALANCED";
-    }
+    readonly property var profiles: [
+        { label: "Saver", value: PowerProfile.PowerSaver },
+        { label: "Balanced", value: PowerProfile.Balanced },
+        { label: "Perf", value: PowerProfile.Performance }
+    ]
 
-    function cycleProfile() {
-        const order = [PowerProfile.PowerSaver, PowerProfile.Balanced];
-        if (PowerProfiles.hasPerformanceProfile) order.push(PowerProfile.Performance);
-        const i = order.indexOf(PowerProfiles.profile);
-        PowerProfiles.profile = order[(i + 1) % order.length];
+    function profileNote(p) {
+        if (p === PowerProfile.PowerSaver) return "Longer battery";
+        if (p === PowerProfile.Performance) return "Max speed";
+        return "Default";
     }
 
     PopupHeader {
@@ -114,12 +113,37 @@ Popup {
         }
     }
 
-    MenuRow {
-        Layout.topMargin: 2
+    Divider { Layout.topMargin: 4 }
+
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.leftMargin: 16
+        Layout.rightMargin: 16
+        Layout.topMargin: 10
         Layout.bottomMargin: 6
-        label: "Profile"
-        hint: root.profileName(PowerProfiles.profile)
-        textColor: Theme.ash
-        onTriggered: root.cycleProfile()
+        spacing: 8
+
+        RowLayout {
+            Layout.fillWidth: true
+            Lb { text: "Profile"; Layout.fillWidth: true }
+            Lb { text: root.profileNote(PowerProfiles.profile) }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 1
+
+            Repeater {
+                model: root.profiles.filter(p => p.value !== PowerProfile.Performance || PowerProfiles.hasPerformanceProfile)
+
+                ModeTab {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    label: modelData.label
+                    active: PowerProfiles.profile === modelData.value
+                    onClicked: PowerProfiles.profile = modelData.value
+                }
+            }
+        }
     }
 }

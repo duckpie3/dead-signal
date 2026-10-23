@@ -24,5 +24,6 @@ Singleton {
     readonly property string close:     "M18 6 L6 18 M6 6 L18 18"
     readonly property string mic:       "M12 2 a3 3 0 0 0 -3 3 v7 a3 3 0 0 0 6 0 V5 a3 3 0 0 0 -3 -3 z M19 10 v2 a7 7 0 0 1 -14 0 v-2 M12 19 v3"
     readonly property string micOff:    "M12 2 a3 3 0 0 0 -3 3 v7 a3 3 0 0 0 6 0 V5 a3 3 0 0 0 -3 -3 z M19 10 v2 a7 7 0 0 1 -14 0 v-2 M12 19 v3 M2 2 L22 22"
+    readonly property string plane:     "M17.8 19.2 L16 11 l3.5 -3.5 C21 6 21.5 4 21 3 c-1 -.5 -3 0 -4.5 1.5 L13 8 4.8 6.2 c-.5 -.1 -.9 .1 -1.1 .5 l-.3 .5 c-.2 .5 -.1 1 .3 1.3 L9 12 l-2 3 H4 l-1 1 3 2 2 3 1 -1 v-3 l3 -2 3.5 5.3 c.3 .4 .8 .5 1.3 .3 l.5 -.2 c.4 -.3 .6 -.7 .5 -1.2 z"
     readonly property string keyboard:  "M2 5 h20 v14 H2 z M6 9 h.01 M10 9 h.01 M14 9 h.01 M18 9 h.01 M7 15 h10"
 }

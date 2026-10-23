@@ -60,6 +60,17 @@ Singleton {
     readonly property string weatherPlace: "Mexico City"
     readonly property string weatherUnit: "celsius"    // or "fahrenheit"
 
+    // ── Display ───────────────────────────────────────────
+    // Night light runs this while it is on. {temp} is the colour temperature in kelvin.
+    // hyprsunset keeps running and restores the screen when it is stopped.
+    readonly property var nightCommand: ["hyprsunset", "-t", "{temp}"]
+    readonly property int nightTemp: 3400
+
+    // ── Tray ──────────────────────────────────────────────
+    // Tray items whose id or title contains one of these (lowercase) are hidden, because the bar
+    // already has a cell for them (Bluetooth and network have their own popups).
+    readonly property var trayHidden: ["blueman", "bluetooth", "nm-applet", "networkmanager"]
+
     // ── Wallpapers ────────────────────────────────────────
     // Folder scanned for images (jpg, png, webp, bmp, gif, avif, jxl; one level of sub-folders).
     readonly property string wallpaperDir: "~/Pictures/Wallpapers"

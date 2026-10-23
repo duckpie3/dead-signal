@@ -12,6 +12,12 @@ Popup {
 
     readonly property bool ok: Net.link === "ok"
 
+    // Read the radio state while this popup is open.
+    onOpenChanged: {
+        Airplane.watch = root.open;
+        if (root.open) Airplane.refresh();
+    }
+
     function history() {
         const h = Net.pingHistory.slice(-40).map(v => Math.min(v / 150, 1));
         return new Array(Math.max(0, 40 - h.length)).fill(0).concat(h);
@@ -122,6 +128,30 @@ Popup {
                 root.dismissed();
                 Net.disconnect();
             }
+        }
+    }
+
+    Divider {}
+
+    RowLayout {
+        Layout.fillWidth: true
+        Layout.leftMargin: 16
+        Layout.rightMargin: 16
+        Layout.topMargin: 10
+        Layout.bottomMargin: 4
+        spacing: 12
+
+        Glyph { path: Icons.plane; color: Airplane.on ? Theme.ivory : Theme.ash }
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 3
+            Txt { text: "Airplane mode"; Layout.fillWidth: true }
+            Lb { text: "Wi-Fi and Bluetooth"; Layout.fillWidth: true }
+        }
+        Toggle {
+            checked: Airplane.on
+            onColor: Theme.ivory
+            onToggled: Airplane.toggle()
         }
     }
 }

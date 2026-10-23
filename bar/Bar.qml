@@ -30,7 +30,7 @@ PanelWindow {
     // Only the bar itself takes pointer input; the margin around it is click-through.
     mask: Region { item: frame }
 
-    // Which popup is open: "", "telemetry", "notifs", "audio", "net", "battery", "clock", "session"
+    // Which popup is open: "", "telemetry", "notifs", "audio", "display", "net", "bluetooth", "battery", "clock", "session"
     property string popup: ""
     function toggle(name) { popup = (popup === name) ? "" : name }
     function close(name) { if (popup === name) popup = "" }
@@ -105,11 +105,19 @@ PanelWindow {
                     onToggle: root.toggle("audio")
                 }
 
-                BrightnessCell {}
+                BrightnessCell {
+                    id: brightCell
+                    onToggle: root.toggle("display")
+                }
 
                 NetCell {
                     id: netCell
                     onToggle: root.toggle("net")
+                }
+
+                BluetoothCell {
+                    id: btCell
+                    onToggle: root.toggle("bluetooth")
                 }
 
                 BatteryCell {
@@ -152,6 +160,20 @@ PanelWindow {
         anchorItem: audioCell
         open: root.popup === "audio"
         onDismissed: root.close("audio")
+    }
+
+    DisplayPopup {
+        bar: root
+        anchorItem: brightCell
+        open: root.popup === "display"
+        onDismissed: root.close("display")
+    }
+
+    BluetoothPopup {
+        bar: root
+        anchorItem: btCell
+        open: root.popup === "bluetooth"
+        onDismissed: root.close("bluetooth")
     }
 
     NetPopup {

@@ -11,7 +11,13 @@ Cell {
 
     required property var bar
 
-    visible: SystemTray.items.values.length > 0
+    // Items the bar already has a cell for (Config.trayHidden) are left out.
+    function hidden(item) {
+        const s = ((item.id || "") + " " + (item.title || "")).toLowerCase();
+        return Config.trayHidden.some(n => s.indexOf(n) >= 0);
+    }
+
+    visible: SystemTray.items.values.some(i => !root.hidden(i))
     hPad: 5
     spacing: 2
 
@@ -23,7 +29,8 @@ Cell {
 
             required property var modelData
 
-            implicitWidth: 22
+            visible: !root.hidden(modelData)
+            implicitWidth: visible ? 22 : 0
             implicitHeight: 22
 
             Rectangle {

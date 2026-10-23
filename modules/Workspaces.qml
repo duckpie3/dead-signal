@@ -83,7 +83,11 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Hyprland.dispatch("workspace " + cell.n)
+                    onClicked: Hyprland.dispatch(
+                        Hyprland.usingLua
+                            ? "hl.dsp.focus({ workspace = " + cell.n + " })"
+                            : "workspace " + cell.n
+                    )
                 }
             }
         }
