@@ -4,7 +4,7 @@ import qs.theme
 import qs.components
 import qs.services
 
-// Backlight. Click opens the display popup; scroll: ±5 %. A moon and a brass pixel while night light is on.
+// Backlight (icon and percent; the meter lives in the popup). Click opens the display popup; scroll: ±5 %. A moon and a brass pixel while night light is on.
 // Hidden when there is no backlight device.
 Cell {
     id: root
@@ -22,15 +22,7 @@ Cell {
         color: NightLight.on ? Theme.brass : Theme.ash
     }
 
-    SegMeter {
-        count: 10
-        onColor: Theme.brass
-        filled: Math.ceil(Brightness.percent / 10)
-    }
-
     Mono {
-        Layout.preferredWidth: 32
-        horizontalAlignment: Text.AlignRight
         text: Brightness.percent + "%"
     }
 

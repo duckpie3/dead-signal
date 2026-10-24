@@ -26,4 +26,11 @@ Singleton {
     readonly property string micOff:    "M12 2 a3 3 0 0 0 -3 3 v7 a3 3 0 0 0 6 0 V5 a3 3 0 0 0 -3 -3 z M19 10 v2 a7 7 0 0 1 -14 0 v-2 M12 19 v3 M2 2 L22 22"
     readonly property string plane:     "M17.8 19.2 L16 11 l3.5 -3.5 C21 6 21.5 4 21 3 c-1 -.5 -3 0 -4.5 1.5 L13 8 4.8 6.2 c-.5 -.1 -.9 .1 -1.1 .5 l-.3 .5 c-.2 .5 -.1 1 .3 1.3 L9 12 l-2 3 H4 l-1 1 3 2 2 3 1 -1 v-3 l3 -2 3.5 5.3 c.3 .4 .8 .5 1.3 .3 l.5 -.2 c.4 -.3 .6 -.7 .5 -1.2 z"
     readonly property string keyboard:  "M2 5 h20 v14 H2 z M6 9 h.01 M10 9 h.01 M14 9 h.01 M18 9 h.01 M7 15 h10"
+    readonly property string play:      "M6 3 L20 12 L6 21 Z"
+    readonly property string pause:     "M6 4 h4 v16 H6 Z M14 4 h4 v16 h-4 Z"
+    readonly property string prev:      "M19 20 L9 12 L19 4 Z M5 19 V5"
+    readonly property string next:      "M5 4 L15 12 L5 20 Z M19 5 V19"
+    readonly property string shuffle:   "M16 3 h5 v5 M4 20 L21 3 M21 16 v5 h-5 M15 15 l6 6 M4 4 l5 5"
+    readonly property string repeat:    "M17 2 l4 4 -4 4 M3 11 v-1 a4 4 0 0 1 4 -4 h14 M7 22 l-4 -4 4 -4 M21 13 v1 a4 4 0 0 1 -4 4 H3"
+    readonly property string external:  "M15 3 h6 v6 M10 14 L21 3 M18 13 v6 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 V8 a2 2 0 0 1 2 -2 h6"
 }

@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import qs.theme
 import qs.components
 
-// Active window: app tag + title.
+// Active window: app tag + title (the title scrolls when it does not fit).
 Item {
     id: root
 
@@ -31,12 +31,11 @@ Item {
             }
         }
 
-        Txt {
+        Marquee {
             Layout.fillWidth: true
+            Layout.preferredHeight: 14
             text: root.title
             color: root.tl ? Theme.ivory : Theme.dust
-            elide: Text.ElideRight
-            maximumLineCount: 1
         }
     }
 }

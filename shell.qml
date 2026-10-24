@@ -114,4 +114,15 @@ ShellRoot {
         // Set a random wallpaper without opening the picker.
         function random(): void { Wallpapers.applyRandom(); }
     }
+
+    // Hardware media keys (these act on the player shown in the bar):
+    //   bindl = , XF86AudioPlay, exec, qs -c deadsignal ipc call media toggle
+    //   bindl = , XF86AudioNext, exec, qs -c deadsignal ipc call media next
+    //   bindl = , XF86AudioPrev, exec, qs -c deadsignal ipc call media previous
+    IpcHandler {
+        target: "media"
+        function toggle(): void { Media.toggle(); }
+        function next(): void { Media.next(); }
+        function previous(): void { Media.prev(); }
+    }
 }

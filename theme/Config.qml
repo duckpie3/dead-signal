@@ -24,7 +24,7 @@ Singleton {
     ]
 
     // Terminal used to launch nmtui from the network popup.
-    readonly property var terminal: ["foot"]
+    readonly property var terminal: ["alacritty", "-e"]
 
     // Session commands.
     readonly property var lockCommand:     ["qs", "-c", "deadsignal", "ipc", "call", "lock", "lock"]
@@ -86,4 +86,8 @@ Singleton {
     readonly property var wallpaperCommand: ["hyprctl", "hyprpaper", "wallpaper", "eDP-1,{file},{fit}"]
     // The picker's Fill / Fit / Tile as your wallpaper tool names them. swww has no tiling; "no" keeps the original size.
     readonly property var wallpaperFitNames: ({ fill: "cover", fit: "contain", tile: "tile" })
+
+    // MPRIS players that never show up in the media cell. Matched as a lowercase substring of the
+    // player's D-Bus name or identity. playerctld only mirrors the other players, so it is hidden.
+    readonly property var mediaIgnore: ["playerctld"]
 }

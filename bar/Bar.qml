@@ -30,7 +30,7 @@ PanelWindow {
     // Only the bar itself takes pointer input; the margin around it is click-through.
     mask: Region { item: frame }
 
-    // Which popup is open: "", "telemetry", "notifs", "audio", "display", "net", "bluetooth", "battery", "clock", "session"
+    // Which popup is open: "", "telemetry", "notifs", "audio", "media", "display", "net", "bluetooth", "battery", "clock", "session"
     property string popup: ""
     function toggle(name) { popup = (popup === name) ? "" : name }
     function close(name) { if (popup === name) popup = "" }
@@ -85,10 +85,28 @@ PanelWindow {
                 }
             }
 
-            // ── Center: context ───────────────────────────
-            WindowTitle {
+            // ── Center: window title, then now playing ────
+            RowLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                spacing: 12
+
+                WindowTitle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+
+                Rectangle {
+                    visible: mediaCell.visible
+                    implicitWidth: 1
+                    implicitHeight: 16
+                    color: Theme.steel
+                }
+
+                MediaCell {
+                    id: mediaCell
+                    onToggle: root.toggle("media")
+                }
             }
 
             // ── Right: telemetry ──────────────────────────
@@ -105,19 +123,11 @@ PanelWindow {
                     onToggle: root.toggle("audio")
                 }
 
-                BrightnessCell {
-                    id: brightCell
-                    onToggle: root.toggle("display")
-                }
-
-                NetCell {
-                    id: netCell
-                    onToggle: root.toggle("net")
-                }
-
-                BluetoothCell {
-                    id: btCell
-                    onToggle: root.toggle("bluetooth")
+                StatusCluster {
+                    id: cluster
+                    onToggleDisplay: root.toggle("display")
+                    onToggleBluetooth: root.toggle("bluetooth")
+                    onToggleNet: root.toggle("net")
                 }
 
                 BatteryCell {
@@ -162,23 +172,30 @@ PanelWindow {
         onDismissed: root.close("audio")
     }
 
+    MediaPopup {
+        bar: root
+        anchorItem: mediaCell
+        open: root.popup === "media"
+        onDismissed: root.close("media")
+    }
+
     DisplayPopup {
         bar: root
-        anchorItem: brightCell
+        anchorItem: cluster.brightItem
         open: root.popup === "display"
         onDismissed: root.close("display")
     }
 
     BluetoothPopup {
         bar: root
-        anchorItem: btCell
+        anchorItem: cluster.btItem
         open: root.popup === "bluetooth"
         onDismissed: root.close("bluetooth")
     }
 
     NetPopup {
         bar: root
-        anchorItem: netCell
+        anchorItem: cluster.netItem
         open: root.popup === "net"
         onDismissed: root.close("net")
     }

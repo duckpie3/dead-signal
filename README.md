@@ -192,6 +192,19 @@ Each of these lives in the popup of the cell it belongs to, so nothing is contro
 - **Tray**: items matching `Config.trayHidden` (blueman, nm-applet by default) are hidden, since the bar has cells
   for them.
 
+## Media
+
+- **Bar:** a now-playing cell sits at the right end of the window-title zone (play/pause icon, title, artist, and a
+  progress line). It is hidden when no MPRIS player is running. Click opens the popup, middle click plays or pauses,
+  scroll skips tracks. Window title, track and artist scroll back and forth when they do not fit
+  (an ellipsis with `DEADSIGNAL_REDUCE_MOTION=1`).
+- **Popup:** cover art (shrunk to a coarse pixel grid), seek bar, shuffle / previous / play / next / repeat, player tabs
+  when more than one player is running, and an "Open <player>" row.
+- **Players:** `Config.mediaIgnore` hides players by D-Bus name or identity (`playerctld` by default).
+- **Keys:** `qs -c deadsignal ipc call media toggle|next|previous`.
+- **Status cluster:** brightness, Bluetooth and network share one cell, each part opening its own popup. The brightness
+  meter, network name and ping history live in the popups only.
+
 ## Layout
 
 ```
@@ -206,7 +219,7 @@ lock/              LockSurface, LockScene, UnlockOverlay
 pam/               password.conf (PAM stack for the lock screen)
 launcher/          LauncherWindow, ResultRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
-services/          Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
+services/          Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
 theme/             Theme (tokens) and Config (your settings)
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```
