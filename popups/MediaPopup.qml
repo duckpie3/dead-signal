@@ -77,7 +77,7 @@ Popup {
         Layout.bottomMargin: 14
         spacing: 14
 
-        // Cover art, shrunk to a coarse grid so it reads as pixels.
+        // Cover art, shown at 2x for a sharp picture.
         Item {
             Layout.alignment: Qt.AlignTop
             implicitWidth: 96
@@ -92,9 +92,10 @@ Popup {
                 width: 94; height: 94
                 visible: false
                 source: Media.art
-                sourceSize: Qt.size(24, 24)
+                sourceSize: Qt.size(192, 192)
                 fillMode: Image.PreserveAspectCrop
-                smooth: false
+                smooth: true
+                mipmap: true
                 asynchronous: true
             }
             Item {

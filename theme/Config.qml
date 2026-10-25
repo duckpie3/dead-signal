@@ -39,6 +39,12 @@ Singleton {
     readonly property var copyCommand: ["wl-copy"]     // wl-clipboard
     readonly property var typeCommand: ["wtype"]       // wtype
 
+    // Clipboard mode (needs cliphist and wl-clipboard). Enter copies the entry, then runs this
+    // to paste it. Terminals usually want ctrl+shift+v: ["wtype","-M","ctrl","-M","shift","-k","v","-m","shift","-m","ctrl"].
+    readonly property var clipPasteCommand: ["wtype", "-M", "ctrl", "-k", "v", "-m", "ctrl"]
+    // Run `wl-paste --watch cliphist store` from the shell. Turn off if you already start it in Hyprland.
+    readonly property bool clipWatch: true
+
     // Opened in `terminal` from the telemetry popup.
     readonly property var monitorCommand: ["btop"]
 

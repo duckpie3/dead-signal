@@ -11,7 +11,7 @@ import "Calc.js" as Calc
 
 // Full-screen transparent overlay (click outside to close) holding a 640 px chamfered panel.
 // Modes are chosen by prefix, or with Tab / the header tabs:
-//   (none) apps   >  command   =  calculator   @  windows
+//   (none) apps   >  command   =  calculator   @  windows   #  clipboard   :  emoji
 PanelWindow {
     id: win
 
@@ -30,19 +30,27 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
     // ── State ─────────────────────────────────────────────
-    readonly property var modes: ["apps", "cmd", "calc", "win"]
-    readonly property var prefixes: ({ apps: "", cmd: "> ", calc: "= ", win: "@ " })
-    readonly property var tabNames: ({ apps: "Apps", cmd: "Cmd", calc: "Calc", win: "Win" })
+    readonly property var modes: ["apps", "cmd", "calc", "win", "clip", "emoji"]
+    readonly property var prefixes: ({ apps: "", cmd: "> ", calc: "= ", win: "@ ", clip: "# ", emoji: ": " })
+    readonly property var tabNames: ({ apps: "Apps", cmd: "Cmd", calc: "Calc", win: "Win", clip: "Clip", emoji: "Emoji" })
 
     readonly property string raw: input.text
-    readonly property string mode: raw.startsWith(">") ? "cmd" : raw.startsWith("=") ? "calc" : raw.startsWith("@") ? "win" : "apps"
+    readonly property string mode: raw.startsWith(">") ? "cmd" : raw.startsWith("=") ? "calc" : raw.startsWith("@") ? "win"
+        : raw.startsWith("#") ? "clip" : raw.startsWith(":") ? "emoji" : "apps"
     readonly property string term: (mode === "apps" ? raw : raw.slice(1)).trim()
     property int sel: 0
+    property string emojiCat: "smileys"
+    property string flashText: ""
+
+    function flash(t) { win.flashText = t; flashTimer.restart() }
+    Timer { id: flashTimer; interval: 1600; onTriggered: win.flashText = "" }
 
     onShownChanged: {
         if (shown) {
             input.text = LauncherState.initialQuery;
             win.sel = 0;
+            win.emojiCat = LauncherStore.recent.length > 0 ? "recent" : "smileys";
+            Clip.refresh();
             input.forceActiveFocus();
         }
     }
@@ -135,6 +143,10 @@ PanelWindow {
                 run: () => Quickshell.execDetached(["sh", "-c", term])
             }];
         }
+        if (mode === "clip")
+            return Clip.available ? Clip.search(term) : [];
+        if (mode === "emoji")
+            return Emoji.list(win.emojiCat, term);
         // calc
         if (!calc.ok) return [];
         return [
@@ -145,12 +157,39 @@ PanelWindow {
         ];
     }
 
+    readonly property int selIdx: Math.min(sel, Math.max(0, results.length - 1))
+
+    // Clipboard: six rows at a time, with a section heading where Pinned turns into Recent.
+    readonly property int clipStart: Math.max(0, Math.min(selIdx - 5, results.length - 6))
+    readonly property var clipRows: {
+        if (mode !== "clip") return [];
+        const out = [];
+        const end = Math.min(results.length, clipStart + 6);
+        const grp = e => term !== "" ? "Matches" : (e.pinned ? "Pinned" : "Recent");
+        for (let i = clipStart; i < end; i++) {
+            const g = grp(results[i]);
+            out.push({ e: results[i], i: i, head: g, showHead: i === clipStart || g !== grp(results[i - 1]) });
+        }
+        return out;
+    }
+    readonly property var curClip: mode === "clip" && results.length > 0 ? results[selIdx] : null
+    onCurClipChanged: if (curClip) Clip.want(curClip)
+    readonly property var emptyClip: ({ id: "", kind: "TEXT", preview: "", text: "", pinned: false, ts: 0, size: "", w: 0, h: 0 })
+
     readonly property var pins: (mode === "apps" && term === "") ? Apps.pinned(8) : []
     readonly property bool noMatch: mode === "apps" && term !== "" && results.length === 0
 
     function run(item) {
         LauncherState.hide();
         item.run();
+    }
+
+    // Enter. Shift+Enter in clipboard mode only copies.
+    function activate(item, alt) {
+        if (!item) return;
+        if (mode === "clip") { LauncherState.hide(); Clip.paste(item, alt); return; }
+        if (mode === "emoji") { LauncherState.hide(); Emoji.insert(item); return; }
+        win.run(item);
     }
 
     function cycleMode(dir) {
@@ -226,7 +265,7 @@ PanelWindow {
 
                         Text {
                             visible: input.text === ""
-                            text: "Search apps, > command, = math, @ window"
+                            text: "Search apps, > command, = math, @ window, # clipboard, : emoji"
                             color: Theme.dust
                             font: input.font
                         }
@@ -234,6 +273,23 @@ PanelWindow {
                         Keys.onPressed: event => {
                             const n = win.results.length;
                             const ctrl = event.modifiers & Qt.ControlModifier;
+                            const shift = event.modifiers & Qt.ShiftModifier;
+                            if (win.mode === "emoji" && !ctrl) {
+                                const step = event.key === Qt.Key_Right ? 1 : event.key === Qt.Key_Left ? -1
+                                    : event.key === Qt.Key_Down ? 12 : event.key === Qt.Key_Up ? -12 : 0;
+                                if (step !== 0) {
+                                    if (n > 0) win.sel = Math.max(0, Math.min(n - 1, win.selIdx + step));
+                                    event.accepted = true;
+                                    return;
+                                }
+                            }
+                            if (win.mode === "clip" && ctrl && (event.key === Qt.Key_P || event.key === Qt.Key_D)) {
+                                const cur = n > 0 ? win.results[win.selIdx] : null;
+                                if (cur && event.key === Qt.Key_P) win.flash(Clip.togglePin(cur) ? (cur.pinned ? "UNPINNED" : "PINNED") : "TEXT ONLY");
+                                else if (cur) { Clip.remove(cur); win.flash("REMOVED"); }
+                                event.accepted = true;
+                                return;
+                            }
                             if (event.key === Qt.Key_Down || (ctrl && event.key === Qt.Key_N)) {
                                 if (n > 0) win.sel = (win.sel + 1) % n;
                                 event.accepted = true;
@@ -247,7 +303,7 @@ PanelWindow {
                                 win.cycleMode(-1);
                                 event.accepted = true;
                             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                if (n > 0) win.run(win.results[Math.min(win.sel, n - 1)]);
+                                if (n > 0) win.activate(win.results[Math.min(win.sel, n - 1)], shift);
                                 event.accepted = true;
                             } else if (event.key === Qt.Key_Escape) {
                                 LauncherState.hide();
@@ -262,8 +318,11 @@ PanelWindow {
 
                     Mono {
                         color: Theme.ash
-                        text: win.mode === "apps" || win.mode === "win"
-                            ? String(win.results.length).padStart(2, "0") + "/" + String(win.mode === "apps" ? Apps.entries.length : ToplevelManager.toplevels.values.length).padStart(2, "0")
+                        text: win.mode === "apps" || win.mode === "win" || win.mode === "clip"
+                            ? String(win.results.length).padStart(2, "0") + "/" + String(win.mode === "apps" ? Apps.entries.length
+                                : win.mode === "clip" ? Clip.entries.length + LauncherStore.pins.length
+                                : ToplevelManager.toplevels.values.length).padStart(2, "0")
+                            : win.mode === "emoji" ? String(win.results.length).padStart(2, "0")
                             : win.mode.toUpperCase()
                     }
 
@@ -326,7 +385,7 @@ PanelWindow {
 
             // ── Results ───────────────────────────────────
             SectionLabel {
-                visible: win.mode !== "calc" && (win.results.length > 0 || win.noMatch)
+                visible: win.mode !== "calc" && win.mode !== "clip" && win.mode !== "emoji" && (win.results.length > 0 || win.noMatch)
                 leftText: win.noMatch ? "No match"
                     : win.mode === "cmd" ? "Command"
                     : win.mode === "win" ? "Windows"
@@ -342,7 +401,7 @@ PanelWindow {
                 spacing: 0
 
                 Repeater {
-                    model: win.results
+                    model: win.mode === "clip" || win.mode === "emoji" ? [] : win.results
                     ResultRow {
                         required property var modelData
                         required property int index
@@ -359,6 +418,81 @@ PanelWindow {
                     item: ({ name: "Run " + win.term + " as command", desc: "Not found in applications", cat: "CMD", tile: ">_", idx: [], rel: 0 })
                     selected: true
                     onActivated: win.run({ run: () => Quickshell.execDetached(["sh", "-c", win.term]) })
+                }
+            }
+
+            // ── Clipboard ─────────────────────────────────
+            ColumnLayout {
+                visible: win.mode === "clip"
+                Layout.fillWidth: true
+                Layout.bottomMargin: 6
+                spacing: 0
+
+                Repeater {
+                    model: 6
+                    ColumnLayout {
+                        id: clipSlot
+                        required property int index
+                        readonly property var row: win.clipRows[index]
+                        visible: row !== undefined
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        SectionLabel {
+                            visible: clipSlot.row !== undefined && clipSlot.row.showHead
+                            leftText: clipSlot.row ? clipSlot.row.head : ""
+                            rightText: "Age"
+                            rightPad: 18
+                        }
+                        ClipRow {
+                            entry: clipSlot.row ? clipSlot.row.e : win.emptyClip
+                            query: win.term
+                            selected: clipSlot.row !== undefined && clipSlot.row.i === win.selIdx
+                            onHovered: if (clipSlot.row) win.sel = clipSlot.row.i
+                            onActivated: if (clipSlot.row) win.activate(clipSlot.row.e, false)
+                        }
+                    }
+                }
+
+                RowLayout {
+                    visible: win.results.length === 0
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 80
+                    Item { Layout.fillWidth: true }
+                    Mono {
+                        text: !Clip.available ? "MISSING" : Clip.entries.length + LauncherStore.pins.length === 0 ? "EMPTY" : "NO MATCH"
+                        color: Theme.rust
+                    }
+                    Txt {
+                        text: !Clip.available ? "needs cliphist and wl-clipboard"
+                            : Clip.entries.length + LauncherStore.pins.length === 0 ? "copy something and it will show up here"
+                            : "nothing in history contains “" + win.term + "”"
+                        color: Theme.dust
+                    }
+                    Item { Layout.fillWidth: true }
+                }
+
+                ClipPreview {
+                    visible: win.results.length > 0
+                    Layout.topMargin: 6
+                    entry: win.curClip || win.emptyClip
+                }
+            }
+
+            // ── Emoji ─────────────────────────────────────
+            EmojiPane {
+                visible: win.mode === "emoji"
+                items: win.mode === "emoji" ? win.results : []
+                sel: win.selIdx
+                cat: win.emojiCat
+                query: win.term
+                onHovered: i => win.sel = i
+                onActivated: i => win.activate(win.results[i], false)
+                onCatPicked: id => {
+                    win.emojiCat = id;
+                    input.text = win.prefixes.emoji;
+                    input.cursorPosition = input.text.length;
+                    win.sel = 0;
                 }
             }
 
@@ -386,17 +520,22 @@ PanelWindow {
                     anchors.rightMargin: 16
                     spacing: 16
 
-                    Keycap { key: "↑↓"; label: "Select" }
-                    Keycap { key: "Enter"; label: "Open" }
-                    Keycap { key: "Tab"; label: "Mode" }
+                    Keycap { key: win.mode === "emoji" ? "↑↓←→" : "↑↓"; label: "Select" }
+                    Keycap { key: "Enter"; label: win.mode === "clip" ? "Paste" : win.mode === "emoji" ? "Insert" : "Open" }
+                    Keycap { visible: win.mode === "clip"; key: "Ctrl P"; label: "Pin" }
+                    Keycap { visible: win.mode === "clip"; key: "Ctrl D"; label: "Remove" }
+                    Keycap { visible: win.mode !== "clip"; key: "Tab"; label: "Mode" }
                     Keycap { key: "Esc"; label: "Close" }
 
                     Item { Layout.fillWidth: true }
 
                     Mono {
                         font.pixelSize: 10
-                        color: win.mode === "calc" && win.calc.ok ? Theme.brass : Theme.dust
-                        text: win.mode === "calc" ? (win.calc.ok ? win.calc.text : "")
+                        color: win.flashText !== "" ? Theme.sage : win.mode === "calc" && win.calc.ok ? Theme.brass : Theme.dust
+                        text: win.flashText !== "" ? win.flashText
+                            : win.mode === "clip" ? (Clip.entries.length + LauncherStore.pins.length) + " ENTRIES"
+                            : win.mode === "emoji" ? Emoji.all.length + " EMOJI"
+                            : win.mode === "calc" ? (win.calc.ok ? win.calc.text : "")
                             : win.mode === "win" ? ToplevelManager.toplevels.values.length + " WINDOWS"
                             : win.mode === "cmd" ? "SH -C"
                             : Apps.entries.length + " APPS"

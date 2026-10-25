@@ -8,13 +8,13 @@ Singleton {
     id: root
 
     property bool open: false
-    property string initialQuery: ""       // prefix to start with: "", "> ", "= ", "@ "
+    property string initialQuery: ""       // prefix to start with: "", "> ", "= ", "@ ", "# ", ": "
 
     function toggle() { open ? hide() : show(""); }
 
-    // name: "", "cmd", "calc" or "win"
+    // name: "", "cmd", "calc", "win", "clip" or "emoji"
     function show(name) {
-        const pre = { cmd: "> ", calc: "= ", win: "@ " };
+        const pre = { cmd: "> ", calc: "= ", win: "@ ", clip: "# ", emoji: ": " };
         root.initialQuery = pre[name] || "";
         root.open = true;
     }

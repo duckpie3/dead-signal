@@ -198,12 +198,32 @@ Each of these lives in the popup of the cell it belongs to, so nothing is contro
   progress line). It is hidden when no MPRIS player is running. Click opens the popup, middle click plays or pauses,
   scroll skips tracks. Window title, track and artist scroll back and forth when they do not fit
   (an ellipsis with `DEADSIGNAL_REDUCE_MOTION=1`).
-- **Popup:** cover art (shrunk to a coarse pixel grid), seek bar, shuffle / previous / play / next / repeat, player tabs
+- **Popup:** cover art, seek bar, shuffle / previous / play / next / repeat, player tabs
   when more than one player is running, and an "Open <player>" row.
 - **Players:** `Config.mediaIgnore` hides players by D-Bus name or identity (`playerctld` by default).
 - **Keys:** `qs -c deadsignal ipc call media toggle|next|previous`.
 - **Status cluster:** brightness, Bluetooth and network share one cell, each part opening its own popup. The brightness
   meter, network name and ping history live in the popups only.
+
+## Clipboard and emoji modes
+
+Two more launcher modes, reached with the `Clip` and `Emoji` tabs, Tab, or a prefix:
+
+- **`#` clipboard history.** Needs `cliphist` and `wl-clipboard`. The shell runs
+  `wl-paste --watch cliphist store` for text and images while it is up (`Config.clipWatch = false` if you already
+  start that in Hyprland). Rows show a type chip (thumbnail for images, swatch for `#hex` colours), the match
+  underlined, type and age; the strip under the list shows the selected entry in full.
+  **Enter** copies and pastes (`Config.clipPasteCommand`, ctrl+v by default; terminals want ctrl+shift+v),
+  **Shift+Enter** only copies, **Ctrl P** pins (text only; pins are kept as copies), **Ctrl D** removes.
+  cliphist keeps no timestamps, so ages count from when this shell first saw the entry (`--` for older ones), and no
+  source app is shown. Password managers that set the sensitive hint are skipped by `wl-paste`/`cliphist` themselves.
+- **`:` emoji.** About 1 900 emoji from emojibase (`launcher/Emoji.js`), by category or search (name and keywords).
+  Arrow keys move through the grid, **Enter** copies the emoji and types it into the window that had focus
+  (`Config.typeCommand`, wtype). Hands and people take a skin tone (picker in the detail strip, remembered).
+  The last twelve you used are under the clock icon. Install `noto-fonts-emoji`.
+- State (pins, entry ages, recent emoji, tone) is in `$XDG_STATE_HOME/deadsignal/launcher.json`.
+- Bindings: `bind = SUPER, V, exec, qs -c deadsignal ipc call launcher mode clip` and
+  `bind = SUPER, period, exec, qs -c deadsignal ipc call launcher mode emoji`.
 
 ## Layout
 
@@ -219,7 +239,7 @@ lock/              LockSurface, LockScene, UnlockOverlay
 pam/               password.conf (PAM stack for the lock screen)
 launcher/          LauncherWindow, ResultRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
-services/          Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
+services/          LauncherStore, Clip, Emoji, Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
 theme/             Theme (tokens) and Config (your settings)
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```
