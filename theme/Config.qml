@@ -96,4 +96,18 @@ Singleton {
     // MPRIS players that never show up in the media cell. Matched as a lowercase substring of the
     // player's D-Bus name or identity. playerctld only mirrors the other players, so it is hidden.
     readonly property var mediaIgnore: ["playerctld"]
+
+    // ── Screenshots and colour picker ─────────────────────
+    // Screenshots are saved here (created when needed) and also copied to the clipboard.
+    readonly property string screenshotDir: "~/Pictures/Screenshots"
+    // Seconds the capture / colour result toast stays. Hovering it holds the countdown.
+    readonly property real captureToastSeconds: 30
+    // Needs grim (screen capture) and wl-clipboard. The picker is built in and reads the frozen
+    // screenshot; set this to "hyprpicker" to use that tool instead (it has no loupe).
+    readonly property string pickerBackend: "builtin"
+    // Shown on the right of the `>` actions. They are labels only: bind the keys in Hyprland
+    // (see the README) and keep this list in step with them.
+    readonly property var actionKeys: ({
+        region: "Print", screen: "Shift Print", window: "Alt Print", picker: "Super Shift C"
+    })
 }

@@ -9,6 +9,8 @@ Popup {
 
     panelWidth: 272
 
+    signal openFocus()
+
     property int monthOffset: 0
     onOpenChanged: {
         if (open) {
@@ -331,6 +333,40 @@ Popup {
                          : parent.modelData.weekend ? Theme.ash
                          : Theme.ivory
                 }
+            }
+        }
+    }
+
+    Divider {}
+
+    // ── Focus timer ───────────────────────────────────────
+    RowLayout {
+        Layout.fillWidth: true
+        Layout.leftMargin: 14
+        Layout.rightMargin: 14
+        Layout.topMargin: 10
+        Layout.bottomMargin: 12
+        spacing: 10
+
+        Glyph { path: Icons.tomato; size: 16; color: Pomodoro.active ? Pomodoro.ink : Theme.ash }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 2
+            Txt { text: "Focus timer"; font.pixelSize: 13 }
+            Lb {
+                text: Pomodoro.active
+                    ? Pomodoro.phaseName(Pomodoro.phase) + " · " + (Pomodoro.ended ? "ready" : Pomodoro.fmt(Pomodoro.secsLeft))
+                    : Pomodoro.cfg.focus + " min · round " + Pomodoro.round + " of " + Pomodoro.rounds
+            }
+        }
+
+        ActionButton {
+            label: Pomodoro.active ? "Open" : "Start"
+            primary: true
+            onClicked: {
+                if (Pomodoro.active) root.openFocus();
+                else { Pomodoro.start(); root.dismissed(); }
             }
         }
     }

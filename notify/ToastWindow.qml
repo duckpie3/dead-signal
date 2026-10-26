@@ -13,7 +13,7 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    visible: Notifs.toasts.length > 0
+    visible: (Notifs.toasts.length > 0 || Capture.toast !== null)
         && (Hyprland.focusedMonitor === null || Hyprland.monitorFor(modelData) === Hyprland.focusedMonitor)
 
     anchors {
@@ -36,6 +36,9 @@ PanelWindow {
         id: stack
         width: parent.width
         spacing: 8
+
+        // Screenshot and colour results sit on top of the notifications.
+        CaptureToast {}
 
         Repeater {
             model: Notifs.toasts

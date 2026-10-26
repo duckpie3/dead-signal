@@ -30,7 +30,7 @@ PanelWindow {
     // Only the bar itself takes pointer input; the margin around it is click-through.
     mask: Region { item: frame }
 
-    // Which popup is open: "", "telemetry", "notifs", "audio", "media", "display", "net", "bluetooth", "battery", "clock", "session"
+    // Which popup is open: "", "telemetry", "notifs", "audio", "media", "display", "net", "bluetooth", "battery", "clock", "focus", "session"
     property string popup: ""
     function toggle(name) { popup = (popup === name) ? "" : name }
     function close(name) { if (popup === name) popup = "" }
@@ -144,6 +144,11 @@ PanelWindow {
                     onToggle: root.toggle("notifs")
                 }
 
+                PomodoroCell {
+                    id: focusCell
+                    onToggle: root.toggle("focus")
+                }
+
                 ClockCell {
                     id: clockCell
                     onToggle: root.toggle("clock")
@@ -219,6 +224,15 @@ PanelWindow {
         anchorItem: clockCell
         open: root.popup === "clock"
         onDismissed: root.close("clock")
+        onOpenFocus: root.popup = "focus"
+    }
+
+    // Hangs from the cell while a timer exists, otherwise from the clock.
+    PomodoroPopup {
+        bar: root
+        anchorItem: Pomodoro.active ? focusCell : clockCell
+        open: root.popup === "focus"
+        onDismissed: root.close("focus")
     }
 
     SessionPopup {

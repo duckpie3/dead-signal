@@ -7,9 +7,9 @@ Dead Signal style guide.
 ## Install
 
 ```sh
-sudo pacman -S quickshell wl-clipboard wtype curl ttf-jetbrains-mono ttf-ibm-plex \
+sudo pacman -S quickshell wl-clipboard wtype grim libnotify curl ttf-jetbrains-mono ttf-ibm-plex \
     networkmanager brightnessctl upower power-profiles-daemon pipewire
-# optional: hyprlock + hypridle (lock), foot (terminal for nmtui)
+# optional: hyprlock + hypridle (lock), foot (terminal for nmtui), hyprpicker (see Screenshots)
 
 mkdir -p ~/.config/quickshell
 cp -r deadsignal ~/.config/quickshell/
@@ -59,7 +59,7 @@ It appears on the focused monitor only; clicking outside closes it.
 | Mode | Prefix | What it does |
 | ---- | ------ | ------------ |
 | Apps | none  | fuzzy search of desktop entries; empty query shows pinned and recent |
-| Cmd  | `>`   | runs the text with `sh -c` |
+| Cmd  | `>`   | actions (screenshots, colour picker, focus timer); text that matches none is run with `sh -c` |
 | Calc | `=`   | evaluates math (`+ - * / % ^`, `sqrt`, `sin`, `log`, `pi` …), shows hex and binary |
 | Win  | `@`   | focuses an open window by title |
 
@@ -70,7 +70,7 @@ Calc results are copied with `wl-copy` or typed with `wtype` (change them in `Co
 Launch history is kept in `~/.local/state/deadsignal/usage.json`. It drives the
 Recent list, the usage meter and, if `Config.pinned` is empty, the pinned tiles.
 The category tag (NET / DEV / MEDIA / SYS) comes from the entry's `Categories`.
-Row icons are letter tiles on purpose; they keep the look consistent with the bar.
+Row icons in Apps are letter tiles on purpose; they keep the look consistent with the bar.
 
 ## Notifications
 
@@ -225,6 +225,54 @@ Two more launcher modes, reached with the `Clip` and `Emoji` tabs, Tab, or a pre
 - Bindings: `bind = SUPER, V, exec, qs -c deadsignal ipc call launcher mode clip` and
   `bind = SUPER, period, exec, qs -c deadsignal ipc call launcher mode emoji`.
 
+## Actions, screenshots, colour picker
+
+`>` with nothing after it lists the actions: **Screenshot region / screen / window**,
+**Pick colour** and **Start focus session**. Typing filters them by name and keywords;
+when nothing matches, the row becomes "Run … as command". The keycaps on the right are
+labels only (`Config.actionKeys`); bind the real keys in `hyprland.conf`:
+
+```
+bind = , Print,        exec, qs -c deadsignal ipc call capture region
+bind = SHIFT, Print,   exec, qs -c deadsignal ipc call capture screen
+bind = ALT, Print,     exec, qs -c deadsignal ipc call capture window
+bind = SUPER SHIFT, C, exec, qs -c deadsignal ipc call capture picker
+```
+
+**Screenshots.** `grim` grabs one frozen frame of the focused monitor and the overlay works on
+that frame, so menus and animations cannot change under you. Tabs on top (or Tab) switch
+Region / Screen / Window. Region: drag, then Enter or the Capture button. Window: click
+the highlighted window. Screen: Enter. Esc or right click cancels.
+The PNG is saved to `Config.screenshotDir` (`~/Pictures/Screenshots`, named
+`2026-10-24_21-12-08.png`) and copied to the clipboard, so it also shows up in `#` mode.
+A toast with a preview offers Open / Folder / Delete and closes after
+`Config.captureToastSeconds`; hovering it holds the countdown.
+Window mode reads window positions from `hyprctl clients -j`.
+
+**Colour picker.** A 9×9 loupe follows the pointer on the frozen frame; click (or Enter)
+copies the hex. The toast shows `rgb()` and `hsl()` with a Copy button for each.
+Set `Config.pickerBackend` to `"hyprpicker"` to use that tool's own overlay instead
+(it copies the hex and still shows the toast).
+
+## Focus timer
+
+Start it from `>` → Start focus session, the Focus timer row in the clock popup, or
+`ipc call focus toggle`. While it exists a cell appears left of the clock:
+tomato, `FOC` / `BRK`, the time and a progress line (teal for focus, brass for a break, dim when
+paused, a copper pixel and DONE when a phase ended and waits for you). Click it for the popup:
+phase tabs, countdown, round pips, reset / pause / skip, the four durations and
+"Start next phase automatically". Every phase end sends a notification (`notify-send`).
+
+Focus runs for the set rounds, then a long break, and the round counter starts again.
+Reset hides the cell. Durations, auto-start and today's count are stored in
+`~/.local/state/deadsignal/launcher.json`, and are changed only in the popup.
+
+```
+bind = SUPER, F, exec, qs -c deadsignal ipc call focus toggle
+```
+
+`ipc call focus` also accepts `start`, `pause`, `reset` and `skip`.
+
 ## Layout
 
 ```
@@ -232,14 +280,15 @@ shell.qml          one Bar per screen
 bar/Bar.qml        window, shell shape, module order, popups
 modules/           one file per bar cell
 popups/            audio, network, calendar, battery, session, telemetry, notifications
-notify/            ToastWindow, ToastCard
+notify/            ToastWindow, ToastCard, CaptureToast
+capture/           CaptureWindow (screenshot and colour picker overlay)
 osd/               OsdWindow
 wallpaper/         WallpaperWindow, WallCard
 lock/              LockSurface, LockScene, UnlockOverlay
 pam/               password.conf (PAM stack for the lock screen)
-launcher/          LauncherWindow, ResultRow, PinTile, CalcView, Fuzzy.js, Calc.js
+launcher/          LauncherWindow, ResultRow, ActionRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
-services/          LauncherStore, Clip, Emoji, Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
+services/          LauncherStore, Capture, Pomodoro, Clip, Emoji, Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
 theme/             Theme (tokens) and Config (your settings)
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```

@@ -33,4 +33,13 @@ Singleton {
     readonly property string shuffle:   "M16 3 h5 v5 M4 20 L21 3 M21 16 v5 h-5 M15 15 l6 6 M4 4 l5 5"
     readonly property string repeat:    "M17 2 l4 4 -4 4 M3 11 v-1 a4 4 0 0 1 4 -4 h14 M7 22 l-4 -4 4 -4 M21 13 v1 a4 4 0 0 1 -4 4 H3"
     readonly property string external:  "M15 3 h6 v6 M10 14 L21 3 M18 13 v6 a2 2 0 0 1 -2 2 H5 a2 2 0 0 1 -2 -2 V8 a2 2 0 0 1 2 -2 h6"
+    readonly property string tomato:    "M12 7.5 C7 7.5 3 11 3 15 C3 19 7 22 12 22 C17 22 21 19 21 15 C21 11 17 7.5 12 7.5 Z M12 7.5 L7.5 5 M12 7.5 L16.5 5 M12 7.5 V3"
+    readonly property string crop:      "M6 2 v14 a2 2 0 0 0 2 2 h14 M18 22 V8 a2 2 0 0 0 -2 -2 H2"
+    readonly property string monitor:   "M2 4 h20 v12 H2 Z M8 20 h8 M12 16 v4"
+    readonly property string appWindow: "M2 4 h20 v16 H2 Z M2 9 h20 M6 6.5 h.01 M10 6.5 h.01"
+    readonly property string pipette:   "M15 4 l5 5 M14 5 l5 5 M13 6 L4 15 v5 h5 L18 11"
+    readonly property string folder:    "M3 6 a1 1 0 0 1 1 -1 h5 l2 3 h9 a1 1 0 0 1 1 1 v9 a1 1 0 0 1 -1 1 H4 a1 1 0 0 1 -1 -1 Z"
+    readonly property string trash:     "M4 7 h16 M10 11 v6 M14 11 v6 M6 7 l1 13 h10 l1 -13 M9 7 V4 h6 v3"
+    readonly property string minus:     "M5 12 h14"
+    readonly property string plus:      "M5 12 h14 M12 5 v14"
 }

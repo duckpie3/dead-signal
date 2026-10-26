@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.bar
+import qs.capture
 import qs.launcher
 import qs.lock
 import qs.notify
@@ -40,6 +41,12 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         WallpaperWindow {}
+    }
+
+    // Screenshot and colour picker overlay, on the monitor that was focused when it started.
+    Variants {
+        model: Quickshell.screens
+        CaptureWindow {}
     }
 
     // Session lock: covers every screen until the password is accepted and the shutters have opened.
@@ -124,5 +131,28 @@ ShellRoot {
         function toggle(): void { Media.toggle(); }
         function next(): void { Media.next(); }
         function previous(): void { Media.prev(); }
+    }
+    // Screenshots:
+    //   bind = , Print, exec, qs -c deadsignal ipc call capture region
+    //   bind = SHIFT, Print, exec, qs -c deadsignal ipc call capture screen
+    //   bind = ALT, Print, exec, qs -c deadsignal ipc call capture window
+    //   bind = SUPER SHIFT, C, exec, qs -c deadsignal ipc call capture picker
+    IpcHandler {
+        target: "capture"
+        function region(): void { Capture.screenshot("region"); }
+        function screen(): void { Capture.screenshot("screen"); }
+        function window(): void { Capture.screenshot("window"); }
+        function picker(): void { Capture.pick(); }
+    }
+
+    // Focus timer:
+    //   bind = SUPER, F, exec, qs -c deadsignal ipc call focus toggle
+    IpcHandler {
+        target: "focus"
+        function toggle(): void { Pomodoro.toggle(); }
+        function start(): void { Pomodoro.start(); }
+        function pause(): void { Pomodoro.pause(); }
+        function reset(): void { Pomodoro.reset(); }
+        function skip(): void { Pomodoro.skip(); }
     }
 }

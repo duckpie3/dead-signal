@@ -128,6 +128,49 @@ PanelWindow {
         return out.slice(0, 7);
     }
 
+    // `>` mode: the built-in actions. Typing filters them by name and keywords; when nothing
+    // matches, the text is offered as a shell command instead.
+    readonly property var actionDefs: [
+        { section: "Capture", name: "Screenshot region", desc: "Drag an area · saved and copied", icon: Icons.crop,
+          key: Config.actionKeys.region, words: "screenshot capture snip area crop select",
+          run: () => Capture.screenshot("region") },
+        { section: "Capture", name: "Screenshot screen", desc: "The focused monitor", icon: Icons.monitor,
+          key: Config.actionKeys.screen, words: "screenshot capture monitor display full",
+          run: () => Capture.screenshot("screen") },
+        { section: "Capture", name: "Screenshot window", desc: "Pick a window", icon: Icons.appWindow,
+          key: Config.actionKeys.window, words: "screenshot capture window app",
+          run: () => Capture.screenshot("window") },
+        { section: "Capture", name: "Pick colour", desc: "Click a pixel · hex goes to the clipboard", icon: Icons.pipette,
+          key: Config.actionKeys.picker, words: "color colour picker eyedropper hex pipette",
+          run: () => Capture.pick() },
+        { section: "Focus",
+          name: Pomodoro.active ? (Pomodoro.running ? "Pause focus timer" : "Resume focus timer") : "Start focus session",
+          desc: Pomodoro.active ? Pomodoro.phaseName(Pomodoro.phase) + " · " + Pomodoro.fmt(Pomodoro.secsLeft)
+              : Pomodoro.cfg.focus + " min · round " + Pomodoro.round + " of " + Pomodoro.rounds,
+          icon: Icons.tomato, key: "", words: "pomodoro timer focus work break start pause",
+          run: () => Pomodoro.active ? Pomodoro.toggle() : Pomodoro.start() }
+    ]
+
+    function searchActions(q) {
+        const defs = win.actionDefs;
+        const out = [];
+        for (let i = 0; i < defs.length; i++) {
+            let m = q === "" ? { score: 0, idx: [] } : Fuzzy.match(defs[i].name, q);
+            if (!m) {
+                if (defs[i].words.indexOf(q.toLowerCase()) < 0) continue;
+                m = { score: 5, idx: [] };
+            }
+            out.push(Object.assign({ action: true, order: i }, defs[i], { idx: m.idx, score: m.score }));
+        }
+        if (q !== "") out.sort((a, b) => b.score - a.score || a.order - b.order);
+        if (out.length === 0 && q !== "")
+            return [{
+                name: "Run " + q + " as command", desc: "Not an action", cat: "CMD", tile: ">_", idx: [], rel: 0,
+                run: () => Quickshell.execDetached(["sh", "-c", q])
+            }];
+        return out;
+    }
+
     readonly property var calc: mode === "calc" ? Calc.evaluate(term) : ({ ok: false, empty: true, error: "" })
 
     readonly property var results: {
@@ -135,14 +178,8 @@ PanelWindow {
             return win.searchApps(term);
         if (mode === "win")
             return win.searchWindows(term);
-        if (mode === "cmd") {
-            if (term === "") return [];
-            return [{
-                name: "Run " + term, desc: "Shell command", cat: "CMD", tile: ">_",
-                idx: [], rel: 0,
-                run: () => Quickshell.execDetached(["sh", "-c", term])
-            }];
-        }
+        if (mode === "cmd")
+            return win.searchActions(term);
         if (mode === "clip")
             return Clip.available ? Clip.search(term) : [];
         if (mode === "emoji")
@@ -323,6 +360,8 @@ PanelWindow {
                                 : win.mode === "clip" ? Clip.entries.length + LauncherStore.pins.length
                                 : ToplevelManager.toplevels.values.length).padStart(2, "0")
                             : win.mode === "emoji" ? String(win.results.length).padStart(2, "0")
+                            : win.mode === "cmd" && win.term !== "" && win.results.length > 0 && win.results[0].action
+                                ? String(win.results.length).padStart(2, "0") + "/" + String(win.actionDefs.length).padStart(2, "0")
                             : win.mode.toUpperCase()
                     }
 
@@ -385,9 +424,8 @@ PanelWindow {
 
             // ── Results ───────────────────────────────────
             SectionLabel {
-                visible: win.mode !== "calc" && win.mode !== "clip" && win.mode !== "emoji" && (win.results.length > 0 || win.noMatch)
+                visible: win.mode !== "calc" && win.mode !== "clip" && win.mode !== "emoji" && win.mode !== "cmd" && (win.results.length > 0 || win.noMatch)
                 leftText: win.noMatch ? "No match"
-                    : win.mode === "cmd" ? "Command"
                     : win.mode === "win" ? "Windows"
                     : win.term === "" ? "Recent" : "Matches"
                 leftColor: win.noMatch ? Theme.rust : Theme.dust
@@ -401,7 +439,7 @@ PanelWindow {
                 spacing: 0
 
                 Repeater {
-                    model: win.mode === "clip" || win.mode === "emoji" ? [] : win.results
+                    model: win.mode === "clip" || win.mode === "emoji" || win.mode === "cmd" ? [] : win.results
                     ResultRow {
                         required property var modelData
                         required property int index
@@ -418,6 +456,50 @@ PanelWindow {
                     item: ({ name: "Run " + win.term + " as command", desc: "Not found in applications", cat: "CMD", tile: ">_", idx: [], rel: 0 })
                     selected: true
                     onActivated: win.run({ run: () => Quickshell.execDetached(["sh", "-c", win.term]) })
+                }
+            }
+
+            // ── Actions (`>`) ─────────────────────────────
+            ColumnLayout {
+                visible: win.mode === "cmd"
+                Layout.fillWidth: true
+                Layout.bottomMargin: 6
+                spacing: 0
+
+                Repeater {
+                    model: win.mode === "cmd" ? win.results : []
+
+                    ColumnLayout {
+                        id: act
+                        required property var modelData
+                        required property int index
+                        readonly property bool head: index === 0 || win.results[index - 1].section !== modelData.section
+                                                      || !!win.results[index - 1].action !== !!modelData.action
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        SectionLabel {
+                            visible: act.head
+                            leftText: act.modelData.action ? act.modelData.section : "No match"
+                            leftColor: act.modelData.action ? Theme.dust : Theme.rust
+                            rightText: !act.modelData.action ? "Fallback"
+                                : act.modelData.section === "Capture" ? "Saved to " + Config.screenshotDir : ""
+                        }
+                        ActionRow {
+                            visible: !!act.modelData.action
+                            item: act.modelData
+                            selected: act.index === win.selIdx
+                            onHovered: win.sel = act.index
+                            onActivated: win.run(act.modelData)
+                        }
+                        ResultRow {
+                            visible: !act.modelData.action
+                            item: act.modelData
+                            selected: act.index === win.selIdx
+                            onHovered: win.sel = act.index
+                            onActivated: win.run(act.modelData)
+                        }
+                    }
                 }
             }
 
@@ -521,7 +603,7 @@ PanelWindow {
                     spacing: 16
 
                     Keycap { key: win.mode === "emoji" ? "↑↓←→" : "↑↓"; label: "Select" }
-                    Keycap { key: "Enter"; label: win.mode === "clip" ? "Paste" : win.mode === "emoji" ? "Insert" : "Open" }
+                    Keycap { key: "Enter"; label: win.mode === "clip" ? "Paste" : win.mode === "emoji" ? "Insert" : win.mode === "cmd" ? "Run" : "Open" }
                     Keycap { visible: win.mode === "clip"; key: "Ctrl P"; label: "Pin" }
                     Keycap { visible: win.mode === "clip"; key: "Ctrl D"; label: "Remove" }
                     Keycap { visible: win.mode !== "clip"; key: "Tab"; label: "Mode" }
@@ -537,7 +619,7 @@ PanelWindow {
                             : win.mode === "emoji" ? Emoji.all.length + " EMOJI"
                             : win.mode === "calc" ? (win.calc.ok ? win.calc.text : "")
                             : win.mode === "win" ? ToplevelManager.toplevels.values.length + " WINDOWS"
-                            : win.mode === "cmd" ? "SH -C"
+                            : win.mode === "cmd" ? (win.term === "" ? win.actionDefs.length + " ACTIONS" : "SH -C")
                             : Apps.entries.length + " APPS"
                     }
                 }
