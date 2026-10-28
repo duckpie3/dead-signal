@@ -143,6 +143,9 @@ PanelWindow {
         { section: "Capture", name: "Pick colour", desc: "Click a pixel · hex goes to the clipboard", icon: Icons.pipette,
           key: Config.actionKeys.picker, words: "color colour picker eyedropper hex pipette",
           run: () => Capture.pick() },
+        { section: "Wallpaper", name: "Wallpaper picker", desc: "Preview your wallpapers · Enter to set", icon: Icons.image,
+          key: Config.actionKeys.wallpaper, words: "wallpaper background backdrop image picture theme change",
+          run: () => Wallpapers.show() },
         { section: "Focus",
           name: Pomodoro.active ? (Pomodoro.running ? "Pause focus timer" : "Resume focus timer") : "Start focus session",
           desc: Pomodoro.active ? Pomodoro.phaseName(Pomodoro.phase) + " · " + Pomodoro.fmt(Pomodoro.secsLeft)
@@ -483,7 +486,8 @@ PanelWindow {
                             leftText: act.modelData.action ? act.modelData.section : "No match"
                             leftColor: act.modelData.action ? Theme.dust : Theme.rust
                             rightText: !act.modelData.action ? "Fallback"
-                                : act.modelData.section === "Capture" ? "Saved to " + Config.screenshotDir : ""
+                                : act.modelData.section === "Capture" ? "Saved to " + Config.screenshotDir
+                                : act.modelData.section === "Wallpaper" ? Config.wallpaperDir : ""
                         }
                         ActionRow {
                             visible: !!act.modelData.action

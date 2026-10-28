@@ -236,7 +236,7 @@ Two more launcher modes, reached with the `Clip` and `Emoji` tabs, Tab, or a pre
 ## Actions, screenshots, colour picker
 
 `>` with nothing after it lists the actions: **Screenshot region / screen / window**,
-**Pick colour** and **Start focus session**. Typing filters them by name and keywords;
+**Pick colour**, **Wallpaper picker** (opens the overlay, same as `ipc call wallpaper toggle`) and **Start focus session**. Typing filters them by name and keywords;
 when nothing matches, the row becomes "Run … as command". The keycaps on the right are
 labels only (`Config.actionKeys`); bind the real keys in `hyprland.conf`:
 

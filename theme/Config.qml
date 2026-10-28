@@ -108,7 +108,7 @@ Singleton {
     // Shown on the right of the `>` actions. They are labels only: bind the keys in Hyprland
     // (see the README) and keep this list in step with them.
     readonly property var actionKeys: ({
-        region: "Print", screen: "Shift Print", window: "Alt Print", picker: "Super Shift C"
+        region: "Print", screen: "Shift Print", window: "Alt Print", picker: "Super Shift C", wallpaper: "Super W"
     })
 
     // ── Lock screen ───────────────────────────────────────

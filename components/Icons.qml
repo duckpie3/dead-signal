@@ -42,4 +42,5 @@ Singleton {
     readonly property string trash:     "M4 7 h16 M10 11 v6 M14 11 v6 M6 7 l1 13 h10 l1 -13 M9 7 V4 h6 v3"
     readonly property string minus:     "M5 12 h14"
     readonly property string plus:      "M5 12 h14 M12 5 v14"
+    readonly property string image:     "M3 4 h18 v16 H3 Z M3 16 l5 -5 4 4 3 -3 6 6 M15 9 h.01"
 }
