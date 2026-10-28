@@ -165,11 +165,19 @@ general {
 listener { timeout = 300  on-timeout = loginctl lock-session }
 ```
 
-Press any key to wake it, type, Enter to unlock. Esc clears. Each character fills one of twelve segments;
-the scan line and the green cascade play first. The session is then released and the dim shutters open
-over your real desktop, so windows fade in rather than pop up. A wrong password
-flashes the segments red and fades them back. The wallpaper behind it is the one set from the picker.
-Caps Lock is read from the keyboard LED in `/sys/class/leds`.
+Press any key to wake it, type, Enter to unlock. Esc clears. The wallpaper (the one set from the picker)
+sits under a flat dim (`Config.lockDim`) with the dot-matrix clock, the date, your account and a status
+line (battery, waiting notifications, weather, host). Nothing is shown that is not real.
+
+The line under your name is an oscilloscope. It scrolls left, and each key press sends a burst through it,
+different for every key; backspace kicks it downward. It turns brass while the password is checked, flashes
+rust when it is refused and settles to a sage line when it is accepted. After `Config.lockoutAfter` wrong
+passwords in a row the screen refuses input for `Config.lockoutSeconds`, with a draining strip.
+
+The lock draws itself in from the top behind one copper line. On unlock the session is released while
+an overlay window already shows the identical picture, so nothing jumps; a beat later the same line
+sweeps down and clears it, and your desktop is there behind the line. Caps Lock is read from the keyboard
+LED in `/sys/class/leds`. With reduced motion on, both sweeps are skipped.
 
 Try it with a second TTY (Ctrl+Alt+F3) logged in first. If the lock ever fails to accept your password,
 run `pkill quickshell` there and start the shell again: the compositor keeps the screen locked until a
@@ -284,11 +292,11 @@ notify/            ToastWindow, ToastCard, CaptureToast
 capture/           CaptureWindow (screenshot and colour picker overlay)
 osd/               OsdWindow
 wallpaper/         WallpaperWindow, WallCard
-lock/              LockSurface, LockScene, UnlockOverlay
+lock/              LockSurface, LockScene, UnlockOverlay, Trace, CornerMark
 pam/               password.conf (PAM stack for the lock screen)
 launcher/          LauncherWindow, ResultRow, ActionRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
-services/          LauncherStore, Capture, Pomodoro, Clip, Emoji, Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState
+services/          LauncherStore, Capture, Pomodoro, Clip, Emoji, Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState, LockTrace
 theme/             Theme (tokens) and Config (your settings)
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```

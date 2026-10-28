@@ -2,12 +2,12 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import qs.theme
-import qs.components
 import qs.services
 
-// Shown for about a second after the session is released: the same 12 dim shutters as the lock screen,
-// now over the real desktop. They open from the middle outward, so windows appear gradually.
-// Input passes straight through it.
+// Mapped while the password is being accepted, hidden under the lock. When the session is released it is
+// already showing the same picture as the lock surface (same scene, same state, opaque), so nothing
+// jumps. A beat later one copper line sweeps down and clears it: the live desktop is revealed behind
+// the line. Input passes straight through.
 PanelWindow {
     id: win
 
@@ -23,56 +23,48 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-    readonly property real slatH: height / 12
-    readonly property int ms: Theme.reduceMotion ? 0 : 1
+    property real p: 0
+    readonly property real cut: p * height
 
-    Repeater {
-        model: 12
+    NumberAnimation {
+        id: sweep
+        target: win
+        property: "p"
+        from: 0
+        to: 1
+        duration: Theme.reduceMotion ? 0 : 900
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: [0.65, 0, 0.35, 1, 1, 1]
+    }
 
-        Rectangle {
-            id: slat
-            required property int index
-            property real p: 0
-            readonly property real full: win.slatH + 1
-
-            width: win.width
-            height: full * (1 - p)
-            y: index % 2 === 0 ? index * win.slatH : (index + 1) * win.slatH + 1 - height
-            color: Qt.rgba(0.043, 0.043, 0.043, 0.9)
-            visible: height > 0.5
-
-            SequentialAnimation {
-                id: openAnim
-                PauseAnimation { duration: Math.round(Math.abs(slat.index - 5.5) * 50) * win.ms }
-                NumberAnimation { target: slat; property: "p"; to: 1; duration: 460 * win.ms; easing.type: Easing.InOutCubic }
-            }
-
-            Connections {
-                target: LockState
-                function onRetractChanged() {
-                    if (LockState.retract) {
-                        openAnim.restart();
-                    } else {
-                        openAnim.stop();
-                        slat.p = 0;
-                    }
-                }
-            }
+    Connections {
+        target: LockState
+        function onRetractChanged() {
+            if (LockState.retract) sweep.restart();
+            else { sweep.stop(); win.p = 0; }
         }
     }
 
-    Row {
-        x: win.width / 2 - width / 2
-        y: win.height / 2 - 38
-        spacing: 10
-        opacity: LockState.curtain && !LockState.retract ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 220 * win.ms } }
-        Rectangle { width: 6; height: 6; color: Theme.sage; anchors.verticalCenter: parent.verticalCenter }
-        Mono {
-            text: "WELCOME BACK, " + LockState.user.toUpperCase()
-            font.pixelSize: 12
-            font.letterSpacing: 1.7
-            anchors.verticalCenter: parent.verticalCenter
+    Item {
+        x: 0
+        y: win.cut
+        width: win.width
+        height: win.height - win.cut
+        clip: true
+
+        LockScene {
+            y: -win.cut
+            width: win.width
+            height: win.height
         }
+    }
+
+    Rectangle {
+        visible: win.p > 0 && win.p < 1
+        y: win.cut
+        width: win.width
+        height: 1
+        color: Theme.copper
+        Rectangle { y: -2; width: 6; height: 5; color: Theme.copper }
     }
 }

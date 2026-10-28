@@ -6,27 +6,33 @@ import qs.theme
 import qs.components
 import qs.services
 
-// The lock screen picture: wallpaper under 12 shutters, dot-matrix clock, and the password panel.
+// The lock screen picture, drawn by the lock surface and, identically, by the unlock overlay:
+// wallpaper under a flat dim, a dot-matrix clock, the user, the oscilloscope and a status line.
 FocusScope {
     id: root
 
     focus: true
-    Component.onCompleted: root.forceActiveFocus()
+    Component.onCompleted: {
+        root.forceActiveFocus();
+        Weather.refresh();
+    }
 
     readonly property string ph: LockState.phase
     readonly property bool opening: ph === "opening"
+    readonly property bool granted: ph === "granted" || opening
+    readonly property bool lockout: ph === "lockout"
     readonly property real cx: width / 2
     readonly property real cy: height / 2
-    readonly property real uiScale: Math.min(1.6, Math.max(1, height / 800))
+    readonly property real uiScale: Math.min(1.6, Math.max(1, height / 720))
     readonly property int ms: Theme.reduceMotion ? 0 : 1
 
     readonly property var stateText: ({
-        idle: "Locked", typing: "Locked", checking: "Verifying", denied: "Denied",
+        idle: "Locked", typing: "Locked", checking: "Verifying", denied: "Denied", lockout: "Locked out",
         granted: "Unlocked", opening: "Unlocked"
     })
     readonly property color stateColor: ph === "checking" ? Theme.brass
-        : ph === "denied" ? Theme.rust
-        : (ph === "granted" || ph === "opening") ? Theme.sage
+        : (ph === "denied" || lockout) ? Theme.rust
+        : granted ? Theme.sage
         : Theme.ash
 
     // ── Keys ──────────────────────────────────────────────
@@ -36,11 +42,12 @@ FocusScope {
         const k = event.key;
         if (k === Qt.Key_Escape) LockState.clear();
         else if (k === Qt.Key_Return || k === Qt.Key_Enter) LockState.submit();
-        else if (k === Qt.Key_Backspace) LockState.backspace();
+        else if (k === Qt.Key_Backspace) { LockTrace.backspace(); LockState.backspace(); }
         else if (event.text.length === 1 && event.text.charCodeAt(0) >= 32 && event.text.charCodeAt(0) !== 127
-                 && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)))
+                 && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
+            LockTrace.key(event.text.charCodeAt(0));
             LockState.type(event.text);
-        else if (k !== Qt.Key_Shift && k !== Qt.Key_Control && k !== Qt.Key_Alt && k !== Qt.Key_Meta
+        } else if (k !== Qt.Key_Shift && k !== Qt.Key_Control && k !== Qt.Key_Alt && k !== Qt.Key_Meta
                  && k !== Qt.Key_CapsLock && k !== Qt.Key_Tab && k !== Qt.Key_AltGr && k !== Qt.Key_Super_L && k !== Qt.Key_Super_R)
             LockState.wake();
     }
@@ -50,7 +57,7 @@ FocusScope {
         onClicked: { LockState.wake(); root.forceActiveFocus(); }
     }
 
-    // ── Wallpaper, full brightness ────────────────────────
+    // ── Wallpaper under a flat dim ────────────────────────
     Rectangle { anchors.fill: parent; color: "#0B0B0B" }
     Image {
         anchors.fill: parent
@@ -62,292 +69,222 @@ FocusScope {
                 : Wallpapers.fit === "tile" ? Image.Tile : Image.PreserveAspectCrop
         sourceSize: Wallpapers.fit === "tile" ? Qt.size(0, 0) : Qt.size(Math.max(root.width, root.height), Math.max(root.width, root.height))
     }
+    Rectangle { anchors.fill: parent; color: Qt.rgba(0.043, 0.043, 0.043, Config.lockDim) }
 
-    // ── Everything on the lock layer ──────────────────────
+    // ── Frame ─────────────────────────────────────────────
+    CornerMark { x: 24; y: 24 }
+    CornerMark { x: root.width - 24 - width; y: 24; atRight: true }
+    CornerMark { x: 24; y: root.height - 24 - height; atBottom: true }
+    CornerMark { x: root.width - 24 - width; y: root.height - 24 - height; atRight: true; atBottom: true }
+
+    Row {
+        x: 52
+        y: 36
+        spacing: 8
+        Rectangle { width: 6; height: 6; color: root.stateColor; anchors.verticalCenter: parent.verticalCenter }
+        Lb { text: root.stateText[root.ph]; color: Theme.ash; anchors.verticalCenter: parent.verticalCenter }
+    }
+
+    // ── Centre column, scaled up a little on big screens ──
     Item {
-        id: ui
-        anchors.fill: parent
-        // The shutters sit between the wallpaper and this layer, so this is added after them (see z).
-        z: 2
-        opacity: root.opening ? 0 : 1
-        Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
+        x: root.cx
+        y: root.cy
+        scale: root.uiScale
+        transformOrigin: Item.TopLeft
 
-        // State, top left
-        Row {
-            x: 40
-            y: 32
-            spacing: 8
-            Rectangle { width: 6; height: 6; color: root.stateColor; anchors.verticalCenter: parent.verticalCenter }
-            Lb { text: root.stateText[root.ph]; color: Theme.ash; anchors.verticalCenter: parent.verticalCenter }
+        DotClock {
+            x: -width / 2
+            y: -210
+            pixel: 14
+            gap: 3
+            text: Time.hhmm
         }
 
-        // Battery, top right
-        Row {
-            id: batt
-            readonly property var dev: UPower.displayDevice
-            readonly property real pct: dev ? (dev.percentage > 1 ? dev.percentage : dev.percentage * 100) : 0
-            visible: !!dev && (dev.isLaptopBattery || dev.energyCapacity > 0)
-            anchors.right: parent.right
-            anchors.rightMargin: 40
-            y: 30
-            spacing: 10
-            Lb { text: "Bat"; anchors.verticalCenter: parent.verticalCenter }
-            SegMeter {
-                anchors.verticalCenter: parent.verticalCenter
-                count: 10
-                filled: Math.ceil(batt.pct / 10)
-                onColor: batt.pct <= 10 ? Theme.rust : batt.pct <= 25 ? Theme.copper : Theme.sage
-            }
-            Mono { text: Math.round(batt.pct) + "%"; color: Theme.ash; anchors.verticalCenter: parent.verticalCenter }
-        }
-
-        // Bottom corners
-        Row {
-            visible: Notifs.unread > 0
-            x: 40
-            y: parent.height - 36 - height
-            spacing: 8
-            Glyph { path: Icons.bell; size: 14; anchors.verticalCenter: parent.verticalCenter }
-            Lb { text: Notifs.unread + " waiting"; anchors.verticalCenter: parent.verticalCenter }
-        }
         Lb {
-            anchors.right: parent.right
-            anchors.rightMargin: 40
-            y: parent.height - 36 - height
-            text: (Quickshell.env("XDG_CURRENT_DESKTOP") || "Wayland") + (LockState.host !== "" ? " · " + LockState.host : "")
+            x: -width / 2
+            y: -108
+            font.pixelSize: 11
+            font.letterSpacing: 1.4
+            color: Theme.ash
+            text: Qt.formatDateTime(Time.date, "dddd · d MMMM yyyy")
         }
 
-        // Centre column, scaled up a little on big screens
-        Item {
-            x: root.cx
-            y: root.cy
-            scale: root.uiScale
-            transformOrigin: Item.TopLeft
+        Rectangle { x: -24; y: -70; width: 48; height: 1; color: Theme.steel }
 
-            DotClock {
-                id: clock
-                x: -width / 2
-                y: -210
-                pixel: 14
-                gap: 3
-                text: Time.hhmm
+        // Waiting: any key.
+        Keycap {
+            x: -width / 2
+            y: 24
+            key: "Any key"
+            label: "to unlock"
+            opacity: root.ph === "idle" ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
+        }
+
+        // The user. The dead pixel of the emblem comes alive when the password is accepted.
+        Row {
+            id: userRow
+            x: -width / 2
+            y: -24
+            spacing: 14
+            opacity: root.ph === "idle" ? 0 : 1
+            Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
+
+            Item {
+                width: 41
+                height: 29
+                anchors.verticalCenter: parent.verticalCenter
+                readonly property var px: [[3, 0], [2, 1], [4, 1], [1, 2], [5, 2], [0, 3], [6, 3], [0, 4], [1, 4], [2, 4], [4, 4], [5, 4], [6, 4]]
+                Repeater {
+                    model: parent.px
+                    Rectangle {
+                        required property var modelData
+                        x: modelData[0] * 6
+                        y: modelData[1] * 6
+                        width: 5
+                        height: 5
+                        color: Theme.ash
+                    }
+                }
+                Rectangle {
+                    x: 3 * 6
+                    y: 4 * 6
+                    width: 5
+                    height: 5
+                    color: root.granted ? Theme.sage : (root.ph === "denied" || root.lockout) ? Theme.rust : Theme.copper
+                    Behavior on color { ColorAnimation { duration: 200 * root.ms } }
+                }
             }
+
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
+                Txt { text: LockState.user; font.pixelSize: 15; font.weight: Font.Medium }
+                Mono {
+                    text: LockState.user + (LockState.host !== "" ? "@" + LockState.host : "")
+                    font.pixelSize: 10
+                    color: Theme.dust
+                }
+            }
+
+            Rectangle {
+                visible: LockState.caps
+                anchors.verticalCenter: parent.verticalCenter
+                color: "transparent"
+                border.width: 1
+                border.color: Theme.rust
+                implicitWidth: capsText.implicitWidth + 10
+                implicitHeight: capsText.implicitHeight + 4
+                width: implicitWidth
+                height: implicitHeight
+                Lb { id: capsText; anchors.centerIn: parent; text: "Caps"; color: Theme.rust }
+            }
+        }
+
+        // The trace, one burst per key.
+        Trace {
+            x: -153
+            y: 13
+            opacity: root.ph === "idle" || root.lockout ? 0 : 1
+            Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
+        }
+
+        // Lockout: a strip that drains, one segment per 1/24 of the wait.
+        RowLayout {
+            x: -153
+            y: 38
+            width: 306
+            spacing: 2
+            opacity: root.lockout ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
+
+            Repeater {
+                model: 24
+                Rectangle {
+                    required property int index
+                    Layout.fillWidth: true
+                    implicitHeight: 2
+                    color: index < Math.ceil(LockState.lockLeft / LockState.lockTotal * 24) ? Theme.rust : Theme.steel
+                }
+            }
+        }
+
+        // Message line
+        RowLayout {
+            x: -153
+            y: 72
+            width: 306
+            opacity: root.ph === "idle" ? 0 : 1
+            Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
 
             Lb {
-                x: -width / 2
-                y: -106
-                font.pixelSize: 11
-                font.letterSpacing: 1.4
-                color: Theme.ash
-                text: Qt.formatDateTime(Time.date, "dddd · d MMMM yyyy")
+                Layout.fillWidth: true
+                text: root.ph === "checking" ? "Verifying"
+                    : root.ph === "denied" ? "Access denied · attempt " + String(LockState.fails).padStart(2, "0")
+                    : root.lockout ? "Locked out · " + String(Math.ceil(LockState.lockLeft / 1000)).padStart(2, "0") + " s"
+                    : root.granted ? "Signal acquired"
+                    : LockState.pw.length > 0 ? String(Math.min(LockState.pw.length, 64)).padStart(2, "0") + " · Enter to unlock"
+                    : "Enter password"
+                color: root.ph === "checking" ? Theme.brass
+                     : (root.ph === "denied" || root.lockout) ? Theme.rust
+                     : root.granted ? Theme.sage
+                     : LockState.pw.length > 0 ? Theme.ash : Theme.dust
             }
-
-            Keycap {
-                x: -width / 2
-                y: 24
-                key: "Any key"
-                label: "to unlock"
-                opacity: root.ph === "idle" ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
-            }
-
-            // ── Password panel ────────────────────────────
-            Item {
-                id: panel
-                x: -190
-                y: -30
-                width: 380
-                height: col.implicitHeight + 32
-                opacity: root.ph === "idle" ? 0 : 1
-                Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
-
-                property real shakeX: 0
-                transform: Translate { x: panel.shakeX }
-
-                SequentialAnimation {
-                    running: root.ph === "denied" && !Theme.reduceMotion
-                    NumberAnimation { target: panel; property: "shakeX"; to: -9; duration: 45 }
-                    NumberAnimation { target: panel; property: "shakeX"; to: 8; duration: 45 }
-                    NumberAnimation { target: panel; property: "shakeX"; to: -5; duration: 45 }
-                    NumberAnimation { target: panel; property: "shakeX"; to: 3; duration: 45 }
-                    NumberAnimation { target: panel; property: "shakeX"; to: 0; duration: 45 }
-                }
-
-                Chamfer { anchors.fill: parent; cut: 8; fillColor: Theme.steel }
-                Chamfer { anchors.fill: parent; anchors.margins: 1; cut: 7; fillColor: Theme.panel }
-
-                ColumnLayout {
-                    id: col
-                    x: 19
-                    y: 17
-                    width: panel.width - 38
-                    spacing: 0
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 14
-
-                        // Emblem: the dead pixel comes alive on success
-                        Item {
-                            Layout.preferredWidth: 41
-                            Layout.preferredHeight: 29
-                            readonly property var px: [[3, 0], [2, 1], [4, 1], [1, 2], [5, 2], [0, 3], [6, 3], [0, 4], [1, 4], [2, 4], [4, 4], [5, 4], [6, 4]]
-                            Repeater {
-                                model: parent.px
-                                Rectangle {
-                                    required property var modelData
-                                    x: modelData[0] * 6
-                                    y: modelData[1] * 6
-                                    width: 5
-                                    height: 5
-                                    color: Theme.ash
-                                }
-                            }
-                            Rectangle {
-                                x: 3 * 6
-                                y: 4 * 6
-                                width: 5
-                                height: 5
-                                color: (root.ph === "granted" || root.opening) ? Theme.sage
-                                     : root.ph === "denied" ? Theme.rust : Theme.copper
-                                Behavior on color { ColorAnimation { duration: 200 * root.ms } }
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 2
-                            Txt { text: LockState.user; font.pixelSize: 15; font.weight: Font.Medium }
-                            Mono {
-                                text: LockState.user + (LockState.host !== "" ? "@" + LockState.host : "")
-                                font.pixelSize: 10
-                                color: Theme.dust
-                            }
-                        }
-
-                        Rectangle {
-                            visible: LockState.caps
-                            color: "transparent"
-                            border.width: 1
-                            border.color: Theme.rust
-                            implicitWidth: capsText.implicitWidth + 10
-                            implicitHeight: capsText.implicitHeight + 4
-                            Lb { id: capsText; anchors.centerIn: parent; text: "Caps"; color: Theme.rust }
-                        }
-                    }
-
-                    // Twelve segments, one per character
-                    Item {
-                        Layout.topMargin: 18
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: 306
-                        Layout.preferredHeight: 30
-
-                        Row {
-                            spacing: 6
-                            Repeater {
-                                model: 12
-
-                                Rectangle {
-                                    id: slot
-                                    required property int index
-
-                                    readonly property int n: Math.min(LockState.pw.length, 12)
-                                    readonly property bool filled: index < n
-                                    readonly property bool newest: LockState.typing && LockState.pw.length > 0 && index === n - 1
-
-                                    readonly property color tint: {
-                                        const p = LockState.phase;
-                                        if (p === "idle" || p === "typing")
-                                            return filled ? Theme.ivory : Theme.steel;
-                                        if (p === "checking") return filled ? Theme.ivory : Theme.ash;
-                                        if (p === "denied") return Theme.rust;
-                                        return Theme.sage;
-                                    }
-
-                                    function delayMs() {
-                                        const p = LockState.phase;
-                                        return p === "checking" ? index * 32 : p === "denied" ? index * 28 : p === "granted" ? index * 40 : 0;
-                                    }
-                                    function durMs() {
-                                        if (LockState.typing)
-                                            return filled ? 140 : (LockState.fade ? 700 : 140);
-                                        return 140;
-                                    }
-
-                                    width: 20
-                                    height: 30
-                                    y: newest ? -4 : 0
-                                    color: Theme.steel
-                                    Behavior on y { NumberAnimation { duration: 80 * root.ms } }
-
-                                    Component.onCompleted: color = tint
-                                    onTintChanged: {
-                                        fadeAnim.stop();
-                                        pause.duration = delayMs() * root.ms;
-                                        blend.duration = durMs() * root.ms;
-                                        blend.from = slot.color;
-                                        blend.to = slot.tint;
-                                        fadeAnim.restart();
-                                    }
-
-                                    SequentialAnimation {
-                                        id: fadeAnim
-                                        PauseAnimation { id: pause }
-                                        ColorAnimation { id: blend; target: slot; property: "color" }
-                                    }
-
-                                    Rectangle {      // copper mark on the newest segment
-                                        width: parent.width
-                                        height: 2
-                                        color: Theme.copper
-                                        visible: slot.newest
-                                    }
-                                }
-                            }
-                        }
-
-                        Rectangle {                  // the scan line
-                            id: scan
-                            visible: root.ph === "checking"
-                            y: -7
-                            width: 2
-                            height: 44
-                            color: Theme.ivory
-                            NumberAnimation on x {
-                                running: root.ph === "checking"
-                                from: -2
-                                to: 304
-                                duration: 400 * root.ms
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.topMargin: 16
-                        Layout.fillWidth: true
-                        Lb {
-                            Layout.fillWidth: true
-                            text: root.ph === "checking" ? "Verifying"
-                                : root.ph === "denied" ? "Access denied · attempt " + String(LockState.fails).padStart(2, "0")
-                                : (root.ph === "granted" || root.opening) ? "Signal acquired"
-                                : LockState.pw.length > 0 ? "Enter to unlock" : "Enter password"
-                            color: root.ph === "checking" ? Theme.brass
-                                 : root.ph === "denied" ? Theme.rust
-                                 : (root.ph === "granted" || root.opening) ? Theme.sage
-                                 : LockState.pw.length > 0 ? Theme.ash : Theme.dust
-                        }
-                        Keycap { key: "Esc"; label: "Clear" }
-                    }
-                }
-            }
+            Keycap { visible: LockState.typing; key: "Esc"; label: "Clear" }
         }
     }
 
-    // ── Shutters: dim the wallpaper while locked. They open in the overlay, after the session is released. ──
-    Rectangle {
-        z: 1
-        anchors.fill: parent
-        color: Qt.rgba(0.043, 0.043, 0.043, 0.9)
+    // ── Status line, bottom centre ────────────────────────
+    Row {
+        id: statusLine
+        x: (root.width - width) / 2
+        y: root.height - 36 - height
+        spacing: 14
+
+        readonly property var dev: UPower.displayDevice
+        readonly property real pct: dev ? (dev.percentage > 1 ? dev.percentage : dev.percentage * 100) : 0
+        readonly property bool showBat: !!dev && (dev.isLaptopBattery || dev.energyCapacity > 0)
+        readonly property bool showNotif: Notifs.unread > 0
+        readonly property bool showWx: Weather.enabled && Weather.ok
+
+        Row {
+            visible: statusLine.showBat
+            spacing: 8
+            anchors.verticalCenter: parent.verticalCenter
+            SegMeter {
+                anchors.verticalCenter: parent.verticalCenter
+                count: 10
+                filled: Math.ceil(statusLine.pct / 10)
+                segH: 8
+                onColor: statusLine.pct <= 10 ? Theme.rust : statusLine.pct <= 25 ? Theme.copper : Theme.sage
+            }
+            Mono { text: Math.round(statusLine.pct) + "%"; font.pixelSize: 10; color: Theme.ash; anchors.verticalCenter: parent.verticalCenter }
+        }
+
+        Rectangle { visible: statusLine.showBat && statusLine.showNotif; width: 1; height: 10; color: Theme.steel; anchors.verticalCenter: parent.verticalCenter }
+
+        Row {
+            visible: statusLine.showNotif
+            spacing: 7
+            anchors.verticalCenter: parent.verticalCenter
+            Glyph { path: Icons.bell; size: 12; anchors.verticalCenter: parent.verticalCenter }
+            Lb { text: Notifs.unread + " waiting"; color: Theme.ash; anchors.verticalCenter: parent.verticalCenter }
+        }
+
+        Rectangle { visible: statusLine.showWx && (statusLine.showBat || statusLine.showNotif); width: 1; height: 10; color: Theme.steel; anchors.verticalCenter: parent.verticalCenter }
+
+        Lb {
+            visible: statusLine.showWx
+            anchors.verticalCenter: parent.verticalCenter
+            text: Config.weatherPlace + " · " + Math.round(Weather.temp) + "°"
+            color: Theme.ash
+        }
+
+        Rectangle { visible: statusLine.showBat || statusLine.showNotif || statusLine.showWx; width: 1; height: 10; color: Theme.steel; anchors.verticalCenter: parent.verticalCenter }
+
+        Lb {
+            anchors.verticalCenter: parent.verticalCenter
+            text: (Quickshell.env("XDG_CURRENT_DESKTOP") || "Wayland") + (LockState.host !== "" ? " · " + LockState.host : "")
+        }
     }
 }

@@ -4,11 +4,14 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pam
 import QtQuick
+import qs.theme
 
 // Lock screen state machine and PAM check.
 //   idle -> typing -> checking -> granted -> opening -> (unlocked)
 //                              \-> denied -> typing
-// The session is only released after the "opening" animation has played.
+//                                         \-> lockout (every Config.lockoutAfter-th failure) -> typing
+// "opening" is the moment the session is released. The overlay window already shows the same
+// picture, and one line then sweeps it away (see UnlockOverlay).
 Singleton {
     id: root
 
@@ -17,9 +20,12 @@ Singleton {
     property string pw: ""
     property int fails: 0
     property bool caps: false
-    property bool fade: false              // segments are fading back after a denied attempt
-    property bool curtain: false           // the overlay window (shutters over the live desktop) is mapped
-    property bool retract: false           // ...and its shutters are opening
+    property bool fade: false              // the trace is settling back after a denied attempt
+    property bool curtain: false           // the overlay window (a copy of the lock screen over the live desktop) is mapped
+    property bool retract: false           // ...and the sweep that clears it has started
+    property double lockUntil: 0           // end of a lockout, ms since epoch
+    property real lockLeft: 0              // ms left of it
+    readonly property real lockTotal: Config.lockoutSeconds * 1000
 
     readonly property string user: Quickshell.env("USER") || "user"
     property string host: ""
@@ -42,7 +48,8 @@ Singleton {
     }
 
     function reset() {
-        scanTimer.stop(); grantTimer.stop(); openTimer.stop(); denyTimer.stop(); retractTimer.stop(); doneTimer.stop();
+        scanTimer.stop(); grantTimer.stop(); denyTimer.stop(); retractTimer.stop(); doneTimer.stop();
+        LockTrace.reset();
         root.curtain = false;
         root.retract = false;
         if (pam.active) pam.abort();
@@ -103,33 +110,44 @@ Singleton {
     }
 
     Timer { id: scanTimer; interval: 460; onTriggered: { root.scanDone = true; root.settle(); } }
-    // Granted -> the lock layer fades out -> the session is released while the overlay (same dim shutters)
-    // is already in place -> the greeting holds a moment -> the shutters open over the live desktop.
+    // Granted holds for a moment, then the session is released. The overlay (same picture, opaque) is
+    // already in place; a beat later one line sweeps it away and the live desktop is there.
     Timer {
         id: grantTimer
-        interval: 1000
+        interval: 900
         onTriggered: {
             root.phase = "opening";
-            openTimer.restart();
-        }
-    }
-    Timer {
-        id: openTimer
-        interval: 350
-        onTriggered: {
             root.locked = false;
             retractTimer.restart();
         }
     }
-    Timer { id: retractTimer; interval: 350; onTriggered: { root.retract = true; doneTimer.restart(); } }
-    Timer { id: doneTimer; interval: 1000; onTriggered: root.reset() }
+    Timer { id: retractTimer; interval: 150; onTriggered: { root.retract = true; doneTimer.restart(); } }
+    Timer { id: doneTimer; interval: 1100; onTriggered: root.reset() }
     Timer {
         id: denyTimer
         interval: 800
         onTriggered: {
-            root.fade = true;
             root.pw = "";
-            root.phase = "typing";
+            if (root.fails % Config.lockoutAfter === 0) {
+                root.lockUntil = Date.now() + root.lockTotal;
+                root.lockLeft = root.lockTotal;
+                root.phase = "lockout";
+            } else {
+                root.fade = true;
+                root.phase = "typing";
+            }
+        }
+    }
+    Timer {
+        interval: 250
+        repeat: true
+        running: root.phase === "lockout"
+        onTriggered: {
+            root.lockLeft = Math.max(0, root.lockUntil - Date.now());
+            if (root.lockLeft <= 0) {
+                root.fade = true;
+                root.phase = "typing";
+            }
         }
     }
 

@@ -110,4 +110,11 @@ Singleton {
     readonly property var actionKeys: ({
         region: "Print", screen: "Shift Print", window: "Alt Print", picker: "Super Shift C"
     })
+
+    // ── Lock screen ───────────────────────────────────────
+    // How much the wallpaper is dimmed behind the lock screen (0 – 1).
+    readonly property real lockDim: 0.74
+    // After this many wrong passwords in a row the lock screen refuses input for lockoutSeconds.
+    readonly property int lockoutAfter: 3
+    readonly property int lockoutSeconds: 30
 }
