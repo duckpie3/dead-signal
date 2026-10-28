@@ -254,9 +254,9 @@ Popup {
                             Lb { text: day.modelData.name }
                             WeatherIcon {
                                 kind: Weather.kindOf(day.modelData.code)
-                                pixel: 2
-                                boxW: 30
-                                boxH: 20
+                                pixel: 3
+                                boxW: 36
+                                boxH: 28
                             }
                             RowLayout {
                                 spacing: 0

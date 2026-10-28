@@ -7,7 +7,8 @@ Item {
 
     property string kind: "clear"
     property bool night: false
-    property int pixel: 4
+    property int pixel: 4                  // distance between pixel centres
+    property int gap: 1                    // empty space between pixels, like the dot-matrix clock
     property int boxW: 56
     property int boxH: 36
 
@@ -60,8 +61,8 @@ Item {
             required property var modelData
             x: modelData.x
             y: modelData.y
-            width: root.pixel
-            height: root.pixel
+            width: root.pixel - root.gap
+            height: root.pixel - root.gap
             color: modelData.c
         }
     }
