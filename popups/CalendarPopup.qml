@@ -7,7 +7,7 @@ import qs.services
 Popup {
     id: root
 
-    panelWidth: 272
+    panelWidth: 312
 
     signal openFocus()
 

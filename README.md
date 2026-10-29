@@ -40,6 +40,8 @@ Quickshell reloads on file save, so you can edit and watch it update.
 | Clock      | calendar + weather |                    |                 |
 | Power icon | session popup     |                      |                 |
 
+Popups and the launcher open with a scan line: a thin brass line steps down the panel and the content appears behind it (about 0.4 s; closing is instant, and `DEADSIGNAL_REDUCE_MOTION=1` turns it off). It lives in `components/ScanReveal.qml`.
+
 Popups close on an outside click or Escape. Inside them: Tab / Shift+Tab to move,
 Up/Down between rows, Enter or Space to activate, Left/Right on sliders.
 Hover is a steel fill; keyboard focus is an ivory outline.

@@ -37,8 +37,9 @@ PopupWindow {
         onCleared: root.dismissed()
     }
 
-    Item {
+    ScanReveal {
         anchors.fill: parent
+        active: root.open
         focus: true
         Keys.onEscapePressed: root.dismissed()
 

@@ -250,8 +250,9 @@ PanelWindow {
         onClicked: LauncherState.hide()
     }
 
-    Item {
+    ScanReveal {
         id: panel
+        active: win.shown
         width: 640
         height: column.implicitHeight + 2
         x: Math.round((parent.width - width) / 2)
