@@ -2,8 +2,8 @@ import QtQuick
 import qs.theme
 import qs.services
 
-// The oscilloscope under the user name: 76 columns of 3 px pixels on a 4 px pitch, newest at the right.
-// The newest two columns are ivory; older ones fade to Cold Steel, in the colour of the phase
+// The oscilloscope under the user name: 102 columns of 2 px pixels on a 3 px pitch, newest at the right.
+// The newest three columns are ivory; older ones fade to Cold Steel, in the colour of the phase
 // (teal typing, brass verifying, rust denied, sage unlocked). A copper pixel marks the probe.
 Item {
     id: root
@@ -47,9 +47,9 @@ Item {
                 const lo = Math.min(y, yp);
                 const hi = Math.max(y, yp);
                 const hot = lo !== 0 || hi !== 0;
-                ctx.fillStyle = age < 2 ? Theme.ivory : root.mix(root.tint, Theme.steel, Math.min(1, age / (hot ? 64 : 14)));
+                ctx.fillStyle = age < 3 ? Theme.ivory : root.mix(root.tint, Theme.steel, Math.min(1, age / (hot ? 85 : 19)));
                 for (let r = lo; r <= hi; r++)
-                    ctx.fillRect(i * 4, 25 + r * 4 - 1, 3, 3);
+                    ctx.fillRect(i * 3, 25 + r * 3 - 1, 2, 2);
             }
         }
     }

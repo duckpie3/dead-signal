@@ -141,7 +141,8 @@ Keys: Left/Right (or the mouse wheel) browse, Enter applies and keeps the picker
 Tab cycles Fill / Fit / Tile, Esc closes. Double-clicking a thumbnail applies it.
 
 Set the folder and the command that applies a wallpaper in `Config.qml` (`wallpaperDir`, `wallpaperCommand`,
-`wallpaperFitNames`). The default is swww, so start its daemon at login (`exec-once = swww-daemon`).
+`wallpaperFitNames`). The default is hyprpaper (0.8+) on the `eDP-1` monitor, so start it at login (`exec-once = hyprpaper`) and change `eDP-1` in
+`wallpaperCommand` to your monitor name if it differs. For swww see the comment above `wallpaperCommand`.
 The choice is kept in `~/.local/state/deadsignal/wallpaper.json` and set again at startup.
 Image sizes come from ImageMagick's `identify` when it is installed.
 

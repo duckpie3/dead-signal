@@ -83,14 +83,15 @@ Singleton {
     // Set again when the shell starts.
     readonly property bool wallpaperRestore: true
     // Command that sets a wallpaper. {file} and {fit} are filled in; {fit} comes from wallpaperFitNames.
-    // Default is swww (start its daemon first, newer builds are called awww: change the first word).
-    // For hyprpaper (0.8+) try:  ["hyprctl", "hyprpaper", "wallpaper", ",{file},{fit}"]
+    // Default is hyprpaper (0.8+) on the eDP-1 monitor; change eDP-1 to your monitor, or leave it empty (",{file},{fit}") for all.
     // with fill -> "cover", fit -> "contain", tile -> "tile".
+    // For swww try:  ["swww", "img", "--resize", "{fit}", "{file}"] with fill -> "crop", fit -> "fit", tile -> "no"
+    // (start its daemon first, newer builds are called awww: change the first word).
     // hyprpaper before 0.8 has no fit modes; use a list of commands, and only {file}:
     //   [["hyprctl", "hyprpaper", "preload", "{file}"], ["hyprctl", "hyprpaper", "wallpaper", ",{file}"]]
     // Whatever the command prints is written to the Quickshell log (qs -c deadsignal log).
     readonly property var wallpaperCommand: ["hyprctl", "hyprpaper", "wallpaper", "eDP-1,{file},{fit}"]
-    // The picker's Fill / Fit / Tile as your wallpaper tool names them. swww has no tiling; "no" keeps the original size.
+    // The picker's Fill / Fit / Tile as your wallpaper tool names them (swww has no tiling; "no" keeps the original size).
     readonly property var wallpaperFitNames: ({ fill: "cover", fit: "contain", tile: "tile" })
 
     // MPRIS players that never show up in the media cell. Matched as a lowercase substring of the
