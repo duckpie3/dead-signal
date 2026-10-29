@@ -121,7 +121,7 @@ FocusScope {
             Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
         }
 
-        // The user. The dead pixel of the emblem comes alive when the password is accepted.
+        // The user.
         Row {
             id: userRow
             x: -width / 2
@@ -130,30 +130,10 @@ FocusScope {
             opacity: root.ph === "idle" ? 0 : 1
             Behavior on opacity { NumberAnimation { duration: 220 * root.ms } }
 
-            Item {
-                width: 40
-                height: 28
+            Emblem {
+                pixel: 4
+                gap: 2
                 anchors.verticalCenter: parent.verticalCenter
-                readonly property var px: [[3, 0], [2, 1], [4, 1], [1, 2], [5, 2], [0, 3], [6, 3], [0, 4], [1, 4], [2, 4], [4, 4], [5, 4], [6, 4]]
-                Repeater {
-                    model: parent.px
-                    Rectangle {
-                        required property var modelData
-                        x: modelData[0] * 6
-                        y: modelData[1] * 6
-                        width: 4
-                        height: 4
-                        color: Theme.ash
-                    }
-                }
-                Rectangle {
-                    x: 3 * 6
-                    y: 4 * 6
-                    width: 4
-                    height: 4
-                    color: root.granted ? Theme.sage : (root.ph === "denied" || root.lockout) ? Theme.rust : Theme.copper
-                    Behavior on color { ColorAnimation { duration: 200 * root.ms } }
-                }
             }
 
             Column {

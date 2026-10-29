@@ -1,7 +1,8 @@
 import QtQuick
 import qs.theme
 
-// 7x5 pixel peak with one copper "dead" pixel in the baseline.
+// 7x5 pixel emblem with one copper "dead" pixel in the baseline (centre of the second-lowest row; the cell below it stays empty).
+// The only definition: the bar and the lock screen both use this component.
 // Same dot:gap rule as every other dot-matrix element: pixel 2, gap 1.
 Item {
     id: root
@@ -13,8 +14,7 @@ Item {
     implicitHeight: 5 * step - gap
 
     readonly property var px: [
-        [3, 0], [2, 1], [4, 1], [1, 2], [5, 2], [0, 3], [6, 3],
-        [0, 4], [1, 4], [2, 4], [4, 4], [5, 4], [6, 4]
+        [3, 0], [2, 1], [3, 1], [4, 1], [2, 2], [3, 2], [4, 2], [1, 3], [2, 3], [4, 3], [5, 3], [1, 4], [5, 4]
     ]
 
     Repeater {
@@ -31,7 +31,7 @@ Item {
 
     Rectangle {
         x: 3 * root.step
-        y: 4 * root.step
+        y: 2 * root.step
         width: root.pixel
         height: root.pixel
         color: Theme.copper
