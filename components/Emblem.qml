@@ -2,12 +2,15 @@ import QtQuick
 import qs.theme
 
 // 7x5 pixel peak with one copper "dead" pixel in the baseline.
+// Same dot:gap rule as every other dot-matrix element: pixel 2, gap 1.
 Item {
     id: root
 
     property int pixel: 2
-    implicitWidth: 7 * pixel
-    implicitHeight: 5 * pixel
+    property int gap: 1
+    readonly property int step: pixel + gap
+    implicitWidth: 7 * step - gap
+    implicitHeight: 5 * step - gap
 
     readonly property var px: [
         [3, 0], [2, 1], [4, 1], [1, 2], [5, 2], [0, 3], [6, 3],
@@ -18,8 +21,8 @@ Item {
         model: root.px
         Rectangle {
             required property var modelData
-            x: modelData[0] * root.pixel
-            y: modelData[1] * root.pixel
+            x: modelData[0] * root.step
+            y: modelData[1] * root.step
             width: root.pixel
             height: root.pixel
             color: Theme.ash
@@ -27,8 +30,8 @@ Item {
     }
 
     Rectangle {
-        x: 3 * root.pixel
-        y: 4 * root.pixel
+        x: 3 * root.step
+        y: 4 * root.step
         width: root.pixel
         height: root.pixel
         color: Theme.copper

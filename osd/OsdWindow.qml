@@ -177,8 +177,8 @@ PanelWindow {
 
         DotText {
             text: win.valueText
-            pixel: 3
-            gap: 1
+            pixel: 4
+            gap: 2
             dimUntil: win.leadingZeros
             lit: win.muted ? Theme.dust : win.over ? Theme.copper : Theme.ivory
             Layout.alignment: Qt.AlignVCenter

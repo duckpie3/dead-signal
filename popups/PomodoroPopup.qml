@@ -86,7 +86,7 @@ Popup {
         DotClock {
             text: Pomodoro.fmt(Pomodoro.secsLeft)
             pixel: 6
-            gap: 2
+            gap: 3
             lit: Pomodoro.ink
         }
 

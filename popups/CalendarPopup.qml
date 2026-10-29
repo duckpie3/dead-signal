@@ -7,7 +7,7 @@ import qs.services
 Popup {
     id: root
 
-    panelWidth: 272
+    panelWidth: 320
 
     signal openFocus()
 
@@ -63,7 +63,7 @@ Popup {
         DotClock {
             text: Time.hhmm
             pixel: 4
-            gap: 1
+            gap: 2
             Layout.alignment: Qt.AlignBottom
         }
 
@@ -113,9 +113,10 @@ Popup {
                 WeatherIcon {
                     kind: Weather.kindOf(Weather.code)
                     night: !Weather.isDay
-                    pixel: 4
-                    boxW: 56
-                    boxH: 36
+                    pixel: 6
+                    gap: 2
+                    boxW: 84
+                    boxH: 54
                 }
 
                 ColumnLayout {

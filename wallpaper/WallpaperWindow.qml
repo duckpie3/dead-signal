@@ -314,7 +314,7 @@ PanelWindow {
                 id: idx
                 text: String(win.sel + 1).padStart(String(win.count).length, "0")
                 pixel: 4
-                gap: 1
+                gap: 2
                 lit: Theme.brass
             }
             Lb {

@@ -24,6 +24,8 @@ Item {
     // Dot-matrix value, or plain text when it has characters the matrix can't draw (1.2e+21).
     DotText {
         id: dots
+        pixel: 6
+        gap: 3
         x: 18
         anchors.verticalCenter: parent.verticalCenter
         visible: root.calc.ok && supported

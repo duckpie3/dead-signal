@@ -6,8 +6,8 @@ Item {
     id: root
 
     property string text: ""
-    property int pixel: 8
-    property int gap: 2
+    property int pixel: 6
+    property int gap: 3
     property int dimUntil: 0               // characters before this index are drawn fully unlit (leading zeros)
     property color lit: Theme.brass
     property color unlit: Theme.steel
