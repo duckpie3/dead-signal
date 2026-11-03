@@ -1,7 +1,7 @@
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import QtQuick
-import qs.theme
+import qs.config
 import qs.components
 
 // System tray. Left click activates (or opens the menu), right click opens the menu,

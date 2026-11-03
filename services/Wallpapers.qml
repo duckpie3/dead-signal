@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs.theme
+import qs.config
 
 // Wallpaper list, the picker's open state, and applying a wallpaper.
 // The applied wallpaper is remembered in ~/.local/state/deadsignal/wallpaper.json

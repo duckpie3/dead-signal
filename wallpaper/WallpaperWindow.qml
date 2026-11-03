@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
-import qs.theme
+import qs.config
 import qs.components
 import qs.services
 
@@ -118,7 +118,7 @@ PanelWindow {
         }
 
         // Preview of the highlighted wallpaper, darkened flat. No blur.
-        Rectangle { anchors.fill: parent; color: "#0B0B0B" }
+        Rectangle { anchors.fill: parent; color: Theme.stage }
         Image {
             anchors.fill: parent
             asynchronous: true
@@ -129,7 +129,7 @@ PanelWindow {
                     : win.scale === "fit" ? Image.PreserveAspectFit : Image.Tile
             sourceSize: win.scale === "tile" ? Qt.size(0, 0) : Qt.size(Math.max(win.width, win.height), Math.max(win.width, win.height))
         }
-        Rectangle { anchors.fill: parent; color: Qt.rgba(0.043, 0.043, 0.043, 0.8) }
+        Rectangle { anchors.fill: parent; color: Theme.dim(0.8) }
 
         // Click outside the cards closes.
         MouseArea {

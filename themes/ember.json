@@ -1,0 +1,17 @@
+{
+  "label": "Ember · dust storm",
+  "order": 4,
+
+  "stage": "#0C0906",
+  "bg": "#16110D",
+  "panel": "#211A15",
+  "steel": "#33291F",
+  "ivory": "#CDBFA9",
+  "ash": "#948774",
+  "dust": "#82766A",
+  "copper": "#B5775A",
+  "teal": "#7E9087",
+  "brass": "#B8A272",
+  "sage": "#8E9772",
+  "rust": "#B0675E"
+}

@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Segmented slider: click or drag to set, scroll or arrow keys to nudge.
 Item {

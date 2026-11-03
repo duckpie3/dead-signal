@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs.theme
+import qs.config
 
 // Clipboard history through cliphist. Entries are listed with `cliphist list`, copied back with
 // `cliphist decode | wl-copy`. cliphist keeps no timestamps or source app, so the age comes from

@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Small uppercase technical label (CPU, NET, LYT …).
 Text {

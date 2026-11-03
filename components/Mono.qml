@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Readout text. JetBrains Mono has fixed-width digits, so values do not jitter.
 Text {

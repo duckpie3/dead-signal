@@ -1,7 +1,8 @@
 import QtQuick
-import qs.theme
+import qs.config
 
-// One line of text. When it does not fit it waits, slides to its end, waits, and slides back.
+// One line of text. When it does not fit it waits, slides to its end, waits, and slides back,
+// at a steady reading speed (about 22 px/s) however long the text is.
 // With reduced motion it is cut with an ellipsis instead. implicitWidth is the full text width,
 // so layouts can cap it and the text scrolls only as much as it has to.
 Item {
@@ -16,6 +17,7 @@ Item {
     clip: true
 
     readonly property real overflow: Math.max(0, label.implicitWidth - width)
+    readonly property int slideMs: Math.max(1500, Math.round(overflow * 45))
 
     function sync() {
         anim.stop();
@@ -42,21 +44,21 @@ Item {
     SequentialAnimation {
         id: anim
         loops: Animation.Infinite
-        PauseAnimation { duration: 2500 }
+        PauseAnimation { duration: 3000 }
         NumberAnimation {
             target: label
             property: "x"
             to: -root.overflow
-            duration: Math.max(1200, Math.min(6000, root.overflow * 30))
-            easing.type: Easing.InOutQuad
+            duration: root.slideMs
+            easing.type: Easing.InOutSine
         }
-        PauseAnimation { duration: 2500 }
+        PauseAnimation { duration: 3000 }
         NumberAnimation {
             target: label
             property: "x"
             to: 0
-            duration: Math.max(1200, Math.min(6000, root.overflow * 30))
-            easing.type: Easing.InOutQuad
+            duration: root.slideMs
+            easing.type: Easing.InOutSine
         }
     }
 }

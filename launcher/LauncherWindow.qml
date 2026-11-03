@@ -3,7 +3,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.components
 import qs.services
 import "Fuzzy.js" as Fuzzy
@@ -36,7 +36,7 @@ PanelWindow {
 
     readonly property string raw: input.text
     readonly property string mode: raw.startsWith(">") ? "cmd" : raw.startsWith("=") ? "calc" : raw.startsWith("@") ? "win"
-        : raw.startsWith("#") ? "clip" : raw.startsWith(":") ? "emoji" : "apps"
+        : raw.startsWith("#") ? "clip" : raw.startsWith(":") ? "emoji" : raw.startsWith("~") ? "theme" : "apps"
     readonly property string term: (mode === "apps" ? raw : raw.slice(1)).trim()
     property int sel: 0
     property string emojiCat: "smileys"
@@ -144,14 +144,18 @@ PanelWindow {
           key: Config.actionKeys.picker, words: "color colour picker eyedropper hex pipette",
           run: () => Capture.pick() },
         { section: "Wallpaper", name: "Wallpaper picker", desc: "Preview your wallpapers · Enter to set", icon: Icons.image,
-          key: Config.actionKeys.wallpaper, words: "wallpaper background backdrop image picture theme change",
+          key: Config.actionKeys.wallpaper, words: "wallpaper background backdrop image picture change",
           run: () => Wallpapers.show() },
         { section: "Focus",
           name: Pomodoro.active ? (Pomodoro.running ? "Pause focus timer" : "Resume focus timer") : "Start focus session",
           desc: Pomodoro.active ? Pomodoro.phaseName(Pomodoro.phase) + " · " + Pomodoro.fmt(Pomodoro.secsLeft)
               : Pomodoro.cfg.focus + " min · round " + Pomodoro.round + " of " + Pomodoro.rounds,
           icon: Icons.tomato, key: "", words: "pomodoro timer focus work break start pause",
-          run: () => Pomodoro.active ? Pomodoro.toggle() : Pomodoro.start() }
+          run: () => Pomodoro.active ? Pomodoro.toggle() : Pomodoro.start() },
+        { section: "Appearance", name: "Theme selector", desc: "Pick a colour theme · " + Themes.palette.label,
+          icon: Icons.palette, key: Config.actionKeys.theme, keep: true,
+          words: "theme appearance colour color scheme dark light palette",
+          run: () => win.openThemes() }
     ]
 
     function searchActions(q) {
@@ -183,6 +187,8 @@ PanelWindow {
             return win.searchWindows(term);
         if (mode === "cmd")
             return win.searchActions(term);
+        if (mode === "theme")
+            return win.searchThemes(term);
         if (mode === "clip")
             return Clip.available ? Clip.search(term) : [];
         if (mode === "emoji")
@@ -212,6 +218,15 @@ PanelWindow {
         }
         return out;
     }
+    // Theme selector: seven rows at a time, scrolling with the highlight.
+    readonly property int themeStart: Math.max(0, Math.min(selIdx - 6, results.length - 7))
+    readonly property var themeRows: {
+        if (mode !== "theme") return [];
+        const out = [];
+        const end = Math.min(results.length, themeStart + 7);
+        for (let i = themeStart; i < end; i++) out.push({ e: results[i], i: i });
+        return out;
+    }
     readonly property var curClip: mode === "clip" && results.length > 0 ? results[selIdx] : null
     onCurClipChanged: if (curClip) Clip.want(curClip)
     readonly property var emptyClip: ({ id: "", kind: "TEXT", preview: "", text: "", pinned: false, ts: 0, size: "", w: 0, h: 0 })
@@ -220,9 +235,38 @@ PanelWindow {
     readonly property bool noMatch: mode === "apps" && term !== "" && results.length === 0
 
     function run(item) {
-        LauncherState.hide();
+        if (!item.keep) LauncherState.hide();
         item.run();
     }
+
+    // The theme selector is a menu of its own, entered from the `>` list. Backspace on its empty
+    // prompt goes back there.
+    function openThemes() {
+        input.text = "~ ";
+        input.cursorPosition = input.text.length;
+        input.forceActiveFocus();
+        Themes.rescan();
+    }
+
+    function searchThemes(q) {
+        const out = [];
+        const list = Themes.list;
+        for (let i = 0; i < list.length; i++) {
+            const t = list[i];
+            const m = q === "" ? { score: 0, idx: [] } : Fuzzy.match(t.label, q);
+            if (!m) continue;
+            out.push({ id: t.id, label: t.label, theme: t, idx: m.idx, score: m.score, order: i, keep: true,
+                       run: () => Themes.set(t.id) });
+        }
+        if (q !== "") out.sort((a, b) => b.score - a.score || a.order - b.order);
+        return out;
+    }
+
+    // Entering the selector puts the highlight on the current theme.
+    onModeChanged: if (mode === "theme") Qt.callLater(() => {
+        const at = win.results.findIndex(r => r.id === Themes.palette.id);
+        win.sel = Math.max(0, at);
+    })
 
     // Enter. Shift+Enter in clipboard mode only copies.
     function activate(item, alt) {
@@ -331,6 +375,12 @@ PanelWindow {
                                 event.accepted = true;
                                 return;
                             }
+                            if (win.mode === "theme" && event.key === Qt.Key_Backspace && win.term === "" && input.text.length <= 2) {
+                                input.text = "> ";
+                                input.cursorPosition = 2;
+                                event.accepted = true;
+                                return;
+                            }
                             if (event.key === Qt.Key_Down || (ctrl && event.key === Qt.Key_N)) {
                                 if (n > 0) win.sel = (win.sel + 1) % n;
                                 event.accepted = true;
@@ -428,7 +478,7 @@ PanelWindow {
 
             // ── Results ───────────────────────────────────
             SectionLabel {
-                visible: win.mode !== "calc" && win.mode !== "clip" && win.mode !== "emoji" && win.mode !== "cmd" && (win.results.length > 0 || win.noMatch)
+                visible: win.mode !== "calc" && win.mode !== "clip" && win.mode !== "emoji" && win.mode !== "cmd" && win.mode !== "theme" && (win.results.length > 0 || win.noMatch)
                 leftText: win.noMatch ? "No match"
                     : win.mode === "win" ? "Windows"
                     : win.term === "" ? "Recent" : "Matches"
@@ -443,7 +493,7 @@ PanelWindow {
                 spacing: 0
 
                 Repeater {
-                    model: win.mode === "clip" || win.mode === "emoji" || win.mode === "cmd" ? [] : win.results
+                    model: win.mode === "clip" || win.mode === "emoji" || win.mode === "cmd" || win.mode === "theme" ? [] : win.results
                     ResultRow {
                         required property var modelData
                         required property int index
@@ -488,7 +538,8 @@ PanelWindow {
                             leftColor: act.modelData.action ? Theme.dust : Theme.rust
                             rightText: !act.modelData.action ? "Fallback"
                                 : act.modelData.section === "Capture" ? "Saved to " + Config.screenshotDir
-                                : act.modelData.section === "Wallpaper" ? Config.wallpaperDir : ""
+                                : act.modelData.section === "Wallpaper" ? Config.wallpaperDir
+                                : ""
                         }
                         ActionRow {
                             visible: !!act.modelData.action
@@ -509,6 +560,30 @@ PanelWindow {
             }
 
             // ── Clipboard ─────────────────────────────────
+            // ── Theme selector (`~`) ──────────────────────
+            ColumnLayout {
+                visible: win.mode === "theme"
+                Layout.fillWidth: true
+                Layout.bottomMargin: 6
+                spacing: 0
+
+                SectionLabel {
+                    leftText: win.results.length > 0 ? "Themes" : "No theme matches"
+                    leftColor: win.results.length > 0 ? Theme.dust : Theme.rust
+                    rightText: win.results.length > 0 ? Config.actionKeys.theme + " · next" : ""
+                }
+                Repeater {
+                    model: win.themeRows
+                    ThemeRow {
+                        required property var modelData
+                        item: modelData.e
+                        selected: modelData.i === win.selIdx
+                        onHovered: win.sel = modelData.i
+                        onActivated: win.run(modelData.e)
+                    }
+                }
+            }
+
             ColumnLayout {
                 visible: win.mode === "clip"
                 Layout.fillWidth: true
@@ -608,7 +683,8 @@ PanelWindow {
                     spacing: 16
 
                     Keycap { key: win.mode === "emoji" ? "↑↓←→" : "↑↓"; label: "Select" }
-                    Keycap { key: "Enter"; label: win.mode === "clip" ? "Paste" : win.mode === "emoji" ? "Insert" : win.mode === "cmd" ? "Run" : "Open" }
+                    Keycap { key: "Enter"; label: win.mode === "clip" ? "Paste" : win.mode === "emoji" ? "Insert" : win.mode === "cmd" ? "Run" : win.mode === "theme" ? "Apply" : "Open" }
+                    Keycap { visible: win.mode === "theme"; key: "Bksp"; label: "Back" }
                     Keycap { visible: win.mode === "clip"; key: "Ctrl P"; label: "Pin" }
                     Keycap { visible: win.mode === "clip"; key: "Ctrl D"; label: "Remove" }
                     Keycap { visible: win.mode !== "clip"; key: "Tab"; label: "Mode" }
@@ -625,6 +701,7 @@ PanelWindow {
                             : win.mode === "calc" ? (win.calc.ok ? win.calc.text : "")
                             : win.mode === "win" ? ToplevelManager.toplevels.values.length + " WINDOWS"
                             : win.mode === "cmd" ? (win.term === "" ? win.actionDefs.length + " ACTIONS" : "SH -C")
+                            : win.mode === "theme" ? Themes.list.length + " THEMES"
                             : Apps.entries.length + " APPS"
                     }
                 }

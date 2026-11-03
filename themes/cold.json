@@ -1,0 +1,17 @@
+{
+  "label": "Cold Signal · slate",
+  "order": 3,
+
+  "stage": "#080A0C",
+  "bg": "#0F1317",
+  "panel": "#171C22",
+  "steel": "#262D35",
+  "ivory": "#BFC6CC",
+  "ash": "#868E95",
+  "dust": "#727A82",
+  "copper": "#A8745F",
+  "teal": "#6C98A3",
+  "brass": "#A8A07E",
+  "sage": "#84967F",
+  "rust": "#A66A68"
+}

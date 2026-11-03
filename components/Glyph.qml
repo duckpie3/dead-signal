@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
-import qs.theme
+import qs.config
 
 // Stroked outline icon from SVG path data (see Icons.qml).
 Item {

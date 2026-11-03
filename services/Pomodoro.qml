@@ -2,7 +2,7 @@ pragma Singleton
 
 import Quickshell
 import QtQuick
-import qs.theme
+import qs.config
 
 // Focus timer: focus → short break, and a long break after the last round.
 // Idle (never started, or reset) hides the bar cell. Durations, rounds, auto-start and today's

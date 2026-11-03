@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import QtQuick
-import qs.theme
+import qs.config
 
 // Screenshots and the colour picker.
 //

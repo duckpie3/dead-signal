@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // "[ENTER] OPEN" hint for the launcher footer.
 Row {

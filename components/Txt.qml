@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Human-readable text (window titles, network names, menu items).
 Text {

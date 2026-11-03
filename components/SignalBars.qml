@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Four stepped signal bars. Lit bars use `onColor`, the rest are Cold Steel.
 Row {

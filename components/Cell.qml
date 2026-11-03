@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 
 // A bar cell: chamfered Dead Panel surface with a centered row of content.
 Item {

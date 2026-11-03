@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import QtQuick
-import qs.theme
+import qs.config
 
 // Hyprland details that are not in Quickshell.Hyprland: keyboard layout and tiling layout.
 Singleton {

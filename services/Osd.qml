@@ -2,7 +2,7 @@ pragma Singleton
 
 import Quickshell
 import QtQuick
-import qs.theme
+import qs.config
 
 // What the on-screen display shows and for how long. It reacts to changes in the services,
 // so it also appears for changes made elsewhere (hardware keys, pavucontrol, another script).

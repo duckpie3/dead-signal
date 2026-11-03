@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.components
 
 // Pinned app in the empty state. Alt+<number> launches it.

@@ -1,6 +1,6 @@
 import Quickshell.Wayland
 import QtQuick
-import qs.theme
+import qs.config
 
 // One per screen, created by the WlSessionLock in shell.qml.
 // The screen starts out black (it is locked from the first frame) and the lock is drawn in from the
@@ -8,7 +8,7 @@ import qs.theme
 WlSessionLockSurface {
     id: surface
 
-    color: "#0B0B0B"
+    color: Theme.stage
 
     property real p: Theme.reduceMotion ? 1 : 0
     readonly property real cut: p * height

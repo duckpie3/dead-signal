@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 import qs.components
 
 // APPS / CMD / CALC / WIN selector in the launcher header.

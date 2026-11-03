@@ -2,7 +2,7 @@ pragma Singleton
 
 import Quickshell
 import QtQuick
-import qs.theme
+import qs.config
 import qs.components
 import "../launcher/Emoji.js" as Data
 

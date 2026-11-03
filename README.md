@@ -111,21 +111,55 @@ Volume goes up to 150 %; the part past 100 % is copper. Duration and distance fr
 ## Weather
 
 The calendar popup shows the current weather, the next 12 hours and the next three days, from
-Open-Meteo (no account or key). Set your place in `theme/Config.qml`: `weatherLat`, `weatherLon`,
+Open-Meteo (no account or key). Set your place in `config/Config.qml`: `weatherLat`, `weatherLon`,
 `weatherPlace` and `weatherUnit` (`"celsius"` or `"fahrenheit"`). It needs `curl`, refreshes every
 20 minutes and when the popup opens, and `weatherEnabled: false` removes the section.
 
 ## Configure
 
-Edit `theme/Config.qml`: bar position (`"top"` or `"bottom"`), workspace count, ping host, keyboard layouts
+Edit `config/Config.qml`: bar position (`"top"` or `"bottom"`), workspace count, ping host, keyboard layouts
 (`match` is a substring of the layout name Hyprland reports), terminal,
 and the lock / suspend / logout / reboot / shutdown commands.
 
-Colors, fonts and geometry are in `theme/Theme.qml`.
+Fonts and geometry are in `config/Theme.qml`; colours come from the active theme (see Themes).
 Set `DEADSIGNAL_REDUCE_MOTION=1` to turn off colour transitions.
 
 Lock uses `loginctl lock-session`, so it needs a locker bound to that event
 (hypridle with `lock_cmd = pidof hyprlock || hyprlock`).
+
+## Themes
+
+Four are built in: **Dead Signal** (dark, the default), **Bleached Signal** (light), **Cold Signal** (slate) and
+**Ember** (dust storm). Every colour in the shell comes from the active theme, so the bar, popups, launcher,
+notifications, lock screen and pickers all change together.
+
+Pick one in the launcher: type `>`, choose **Theme selector**, then Enter on a theme. Each row shows a small
+preview and the theme's palette (bar, panel, steel, text, signal colours). Applying keeps the launcher open so you
+can try several; Backspace goes back to the `>` list and Esc closes. Or bind a key to the next theme:
+
+```
+bind = SUPER, T, exec, qs -c deadsignal ipc call theme next
+```
+
+`ipc call theme set light` picks one by id (the file name: `dark`, `light`, `cold`, `ember`, or yours) and
+`ipc call theme current` prints the active id. The choice is remembered in `~/.local/state/deadsignal/theme.json`.
+
+**Your own theme:** every theme is one file in the `themes` folder. Copy `themes/dark.json` to
+`themes/moss.json` (the file name is the id), change the label and the colours, and open the theme selector:
+it is listed straight away, no restart. Colours are `#RRGGBB`. Anything you leave out comes from `base`, a
+theme id (default `dark`), so a theme can be a label and a few colours.
+
+| Key | Used for |
+| --- | --- |
+| `label` | name shown in the selector |
+| `order` | position in the list (optional, built-ins are 1–4, the rest sort by name after them) |
+| `base` | theme that supplies any missing colour (optional) |
+| `stage` | backdrop behind the lock screen, wallpaper picker and screenshot overlay |
+| `bg` `panel` `steel` | bar background, cells and popups, hover / borders / empty segments |
+| `ivory` `ash` `dust` | main text, secondary text and icons, labels and inactive |
+| `copper` `teal` `brass` `sage` `rust` | warning, audio and network, clock and numbers, healthy, errors |
+
+Keep text readable on `panel`: `ivory` about 9:1, `ash` 5:1, `dust` and the accents 4:1 or better.
 
 ## Wallpaper picker
 
@@ -300,7 +334,8 @@ pam/               password.conf (PAM stack for the lock screen)
 launcher/          LauncherWindow, ResultRow, ActionRow, PinTile, CalcView, Fuzzy.js, Calc.js
 components/        Cell, Chamfer, SegMeter, SegSlider, Spark, DotClock, Glyph …
 services/          LauncherStore, Capture, Pomodoro, Clip, Emoji, Media, Bt, NightLight, Airplane, Audio, Net, Stats, Brightness, HyprInfo, Time, Apps, LauncherState, Notifs, Weather, Osd, Wallpapers, LockState, LockTrace
-theme/             Theme (tokens) and Config (your settings)
+config/            Config (your settings), Theme (tokens) and Themes (loader)
+themes/            one file per colour theme
 scripts/           netinfo.sh (nmcli), ping.sh, sysinfo.sh (freq, temp, disk, top), wallpapers.sh
 ```
 

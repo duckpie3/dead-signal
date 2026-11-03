@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.components
 
 // "MATCHES ........ REL" row above a list.

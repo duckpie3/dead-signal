@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs.theme
+import qs.config
 
 // Forecast from Open-Meteo, refreshed every 20 minutes. Shown in the calendar popup.
 Singleton {

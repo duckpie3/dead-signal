@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs.theme
+import qs.config
 
 // Night light: runs Config.nightCommand (hyprsunset by default) while it is on.
 // Changing the temperature restarts the command after a short pause.

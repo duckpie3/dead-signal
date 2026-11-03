@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Pixel-art weather glyph. kind: clear | partly | cloudy | rain | snow | storm.
 Item {

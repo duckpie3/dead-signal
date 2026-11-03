@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Chamfered icon button for transport controls. `big` is the 48 px play button with a top bar.
 Item {

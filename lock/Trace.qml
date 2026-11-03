@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 import qs.services
 
 // The oscilloscope under the user name: 102 columns of 2 px pixels on a 3 px pitch, newest at the right.

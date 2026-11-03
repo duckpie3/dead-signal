@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Opens its content with a scan line: a 2 px brass line steps down in 6 px rows and the
 // content appears behind it. Only runs when `active` turns on; closing is instant.

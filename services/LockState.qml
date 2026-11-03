@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pam
 import QtQuick
-import qs.theme
+import qs.config
 
 // Lock screen state machine and PAM check.
 //   idle -> typing -> checking -> granted -> opening -> (unlocked)

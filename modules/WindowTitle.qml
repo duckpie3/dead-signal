@@ -1,7 +1,7 @@
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.components
 
 // Active window: app tag + title (the title scrolls when it does not fit).

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Effects
-import qs.theme
+import qs.config
 import qs.components
 import qs.services
 
@@ -113,7 +113,7 @@ Item {
         Chamfer {
             anchors.fill: parent
             cut: 11
-            fillColor: Qt.rgba(0.043, 0.043, 0.043, card.tab(card.dim, card.a))
+            fillColor: Theme.dim(card.tab(card.dim, card.a))
         }
     }
 

@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // 36x18 chamfered switch. The knob steps across; its colour says whether it is on.
 Item {

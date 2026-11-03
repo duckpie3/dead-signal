@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // 3x5 dot-matrix "HH:MM" display with faint unlit pixels.
 Item {

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 
 Rectangle {
     Layout.fillWidth: true

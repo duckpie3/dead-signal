@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Small square icon button with hover fill and a keyboard focus ring.
 Item {

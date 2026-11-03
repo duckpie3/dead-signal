@@ -1,7 +1,7 @@
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.components
 import qs.services
 

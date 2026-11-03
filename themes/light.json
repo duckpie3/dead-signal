@@ -1,0 +1,17 @@
+{
+  "label": "Bleached Signal · light",
+  "order": 2,
+
+  "stage": "#CFCBC2",
+  "bg": "#E4E1DA",
+  "panel": "#D8D5CC",
+  "steel": "#BDBAB0",
+  "ivory": "#232321",
+  "ash": "#585751",
+  "dust": "#6B6A64",
+  "copper": "#8A5A4D",
+  "teal": "#456661",
+  "brass": "#76693F",
+  "sage": "#58664B",
+  "rust": "#8C4743"
+}

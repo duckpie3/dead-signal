@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 
 // Popup row. Hover fills with Cold Steel; keyboard focus draws an ivory ring,
 // so the two states stay distinguishable.

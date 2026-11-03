@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs.theme
+import qs.config
 
 // Connection details from NetworkManager (nmcli) and latency from ping.
 Singleton {

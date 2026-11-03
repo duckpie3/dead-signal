@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Small outlined text button used under toasts and in popup rows. The first one is `primary`.
 Item {

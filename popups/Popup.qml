@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Hyprland
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.components
 
 // Base popup: a chamfered Dead Panel under the bar, right-aligned to its anchor cell.

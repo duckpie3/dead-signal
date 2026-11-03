@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // 24 px chamfered − / + button for steppers.
 Item {

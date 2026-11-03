@@ -1,0 +1,17 @@
+{
+  "label": "Dead Signal · dark",
+  "order": 1,
+
+  "stage": "#0B0B0B",
+  "bg": "#141414",
+  "panel": "#202020",
+  "steel": "#303030",
+  "ivory": "#C3C0B8",
+  "ash": "#8A8985",
+  "dust": "#777773",
+  "copper": "#9C7165",
+  "teal": "#78908B",
+  "brass": "#A69A79",
+  "sage": "#89947D",
+  "rust": "#A16E6A"
+}

@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // Bottom-aligned history bars. `values` are 0..1; colorFn(v) picks each bar's color.
 Row {

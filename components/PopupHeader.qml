@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 
 // Popup title row: colored square marker, label, and a status on the right.
 RowLayout {

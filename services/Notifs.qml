@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Services.Notifications
 import QtQuick
-import qs.theme
+import qs.config
 
 // Notification daemon. Every notification is kept (tracked) until the user dismisses it;
 // toasts are just the recent ones still counting down.

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
-import qs.theme
+import qs.config
 
 // Filled rectangle with the top-left and bottom-right corners cut at 45°.
 Shape {

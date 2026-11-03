@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // 14 px registration mark in a screen corner.
 Item {

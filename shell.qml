@@ -11,6 +11,7 @@ import qs.lock
 import qs.notify
 import qs.osd
 import qs.services
+import qs.config
 import qs.wallpaper
 
 ShellRoot {
@@ -143,6 +144,16 @@ ShellRoot {
         function screen(): void { Capture.screenshot("screen"); }
         function window(): void { Capture.screenshot("window"); }
         function picker(): void { Capture.pick(); }
+    }
+
+    // Themes:
+    //   bind = SUPER, T, exec, qs -c deadsignal ipc call theme next
+    //   ... ipc call theme set light        (dark, light, cold, ember, or one of yours)
+    IpcHandler {
+        target: "theme"
+        function next(): void { Themes.next(); }
+        function set(id: string): void { Themes.set(id); }
+        function current(): string { return Themes.palette.id; }
     }
 
     // Focus timer:

@@ -1,5 +1,5 @@
 import QtQuick
-import qs.theme
+import qs.config
 
 // 3x5 dot-matrix text for numbers: 0-9, "-" and ".". Unlit pixels stay faintly visible.
 Item {

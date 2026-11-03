@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import qs.theme
+import qs.config
 
 // Desktop entries plus launch history. History lives in ~/.local/state/deadsignal/usage.json.
 Singleton {

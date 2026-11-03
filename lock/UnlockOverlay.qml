@@ -1,7 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
-import qs.theme
+import qs.config
 import qs.services
 
 // Mapped while the password is being accepted, hidden under the lock. When the session is released it is

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.UPower
-import qs.theme
+import qs.config
 import qs.components
 import qs.services
 
@@ -58,7 +58,7 @@ FocusScope {
     }
 
     // ── Wallpaper under a flat dim ────────────────────────
-    Rectangle { anchors.fill: parent; color: "#0B0B0B" }
+    Rectangle { anchors.fill: parent; color: Theme.stage }
     Image {
         anchors.fill: parent
         asynchronous: true
@@ -69,7 +69,7 @@ FocusScope {
                 : Wallpapers.fit === "tile" ? Image.Tile : Image.PreserveAspectCrop
         sourceSize: Wallpapers.fit === "tile" ? Qt.size(0, 0) : Qt.size(Math.max(root.width, root.height), Math.max(root.width, root.height))
     }
-    Rectangle { anchors.fill: parent; color: Qt.rgba(0.043, 0.043, 0.043, Config.lockDim) }
+    Rectangle { anchors.fill: parent; color: Theme.dim(Config.lockDim) }
 
     // ── Frame ─────────────────────────────────────────────
     CornerMark { x: 24; y: 24 }

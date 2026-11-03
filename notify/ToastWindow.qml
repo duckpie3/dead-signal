@@ -3,7 +3,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
-import qs.theme
+import qs.config
 import qs.services
 
 // Toast stack, top right of the focused monitor, just clear of the bar when it is at the top.

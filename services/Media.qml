@@ -3,7 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Services.Mpris
 import QtQuick
-import qs.theme
+import qs.config
 
 // MPRIS media players. `current` is the player the bar and popup show: the one you picked in the
 // popup if it still exists, otherwise the first one that is playing, otherwise the first one.

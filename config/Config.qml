@@ -109,8 +109,13 @@ Singleton {
     // Shown on the right of the `>` actions. They are labels only: bind the keys in Hyprland
     // (see the README) and keep this list in step with them.
     readonly property var actionKeys: ({
-        region: "Print", screen: "Shift Print", window: "Alt Print", picker: "Super Shift C", wallpaper: "Super W"
+        region: "Print", screen: "Shift Print", window: "Alt Print", picker: "Super Shift C", wallpaper: "Super W", theme: "Super T"
     })
+
+    // ── Themes ────────────────────────────────────────────
+    // Themes are files in the `themes` folder, one each (dark, light, cold, ember). Copy one, rename it,
+    // change the colours, and it appears in the launcher's theme selector (`>` then "Theme selector").
+    // To switch from a key, bind  qs -c deadsignal ipc call theme next  (the label below is only a hint).
 
     // ── Lock screen ───────────────────────────────────────
     // How much the wallpaper is dimmed behind the lock screen (0 – 1).
